@@ -9,7 +9,10 @@ import GestionNegocios from "./Administrador/GestionNegocios";
 import AgregarNegocio from "./Administrador/AgregarNegocio";
 import DetalleNegocio from "./Administrador/DetalleNegocio";
 
+
+
 function App() {
+ 
   return (
     <Routes>
 
