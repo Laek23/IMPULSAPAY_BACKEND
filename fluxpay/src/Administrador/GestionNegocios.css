@@ -1,7 +1,16 @@
+/* =========================
+   RESET GENERAL
+========================= */
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f4f7fb;
 }
 
 /* =========================
@@ -11,12 +20,10 @@
 .admin-layout {
   display: flex;
   min-height: 100vh;
-  font-family: 'Segoe UI', sans-serif;
-  background: #f4f7fb;
 }
 
 /* =========================
-   SIDEBAR MODERNO
+   SIDEBAR
 ========================= */
 
 .admin-sidebar {
@@ -27,10 +34,7 @@
   flex-direction: column;
   padding: 35px 0;
   box-shadow: 4px 0 25px rgba(0,0,0,0.08);
-  transition: all 0.3s ease;
 }
-
-/* LOGO */
 
 .admin-logo-container {
   display: flex;
@@ -41,14 +45,12 @@
 .admin-logo {
   width: 130px;
   border-radius: 16px;
-  transition: transform 0.3s ease;
+  transition: 0.3s ease;
 }
 
 .admin-logo:hover {
   transform: scale(1.05);
 }
-
-/* MENU */
 
 .sidebar-menu {
   list-style: none;
@@ -68,7 +70,7 @@
   cursor: pointer;
   font-size: 15px;
   color: rgba(255,255,255,0.75);
-  transition: all 0.3s ease;
+  transition: 0.3s ease;
 }
 
 .sidebar-menu li:hover {
@@ -92,8 +94,6 @@
   border-radius: 0 6px 6px 0;
 }
 
-/* LOGOUT */
-
 .logout {
   margin-top: auto;
   padding: 25px;
@@ -103,8 +103,8 @@
   cursor: pointer;
   font-weight: 500;
   color: rgba(255,255,255,0.75);
-  transition: all 0.3s ease;
   border-top: 1px solid rgba(255,255,255,0.1);
+  transition: 0.3s ease;
 }
 
 .logout:hover {
@@ -123,7 +123,7 @@
 }
 
 /* =========================
-   HEADER MODERNO
+   HEADER
 ========================= */
 
 .header-wrapper {
@@ -152,8 +152,6 @@
   gap: 25px;
 }
 
-/* SEARCH */
-
 .search-bar {
   display: flex;
   align-items: center;
@@ -161,11 +159,6 @@
   padding: 9px 14px;
   border-radius: 10px;
   gap: 10px;
-  transition: 0.3s ease;
-}
-
-.search-bar:hover {
-  background: #e2e8f0;
 }
 
 .search-bar input {
@@ -174,27 +167,21 @@
   background: transparent;
 }
 
-/* PROFILE */
-
-.profile-section {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.notif-btn {
+  border: none;
+  background: #f1f5f9;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
-.p-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  transition: 0.3s ease;
-}
-
-.p-avatar:hover {
-  transform: scale(1.1);
+.notif-btn:hover {
+  background: #e2e8f0;
 }
 
 /* =========================
-   DASHBOARD
+   CONTENIDO
 ========================= */
 
 .admin-dashboard {
@@ -203,133 +190,108 @@
 }
 
 /* =========================
-   MÉTRICAS
+   FILTROS
 ========================= */
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 22px;
-  margin-bottom: 35px;
+.filtros {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
 }
 
-.stat-card {
-  background: white;
-  padding: 22px;
-  border-radius: 18px;
-  box-shadow: 0 8px 18px rgba(0,0,0,0.05);
-  transition: all 0.3s ease;
+.filtro-btn {
+  padding: 8px 18px;
+  border-radius: 25px;
+  border: none;
+  cursor: pointer;
+  background: #e2e8f0;
+  font-weight: 600;
+  transition: 0.3s;
 }
 
-.stat-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 25px rgba(0,0,0,0.08);
-}
-
-.stat-card h4 {
-  font-size: 13px;
-  color: #7a8ca5;
-  margin-bottom: 8px;
-}
-
-.stat-card p {
-  font-size: 24px;
-  font-weight: bold;
-  color: #1a2b49;
-}
-
-.positive {
-  color: #16a34a;
-  font-size: 14px;
+.filtro-btn.active {
+  background: #0d2b5c;
+  color: white;
 }
 
 /* =========================
-   SECCIÓN MEDIA
+   TABLA NEGOCIOS
 ========================= */
 
-.middle-section {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 22px;
-  margin-bottom: 35px;
+.negocios-table {
+  background: white;
+  border-radius: 18px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+  overflow: hidden;
 }
 
-.chart-box,
-.recent-business,
-.action-card,
-.report-item {
-  background: white;
-  padding: 25px;
-  border-radius: 18px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+.table-header,
+.table-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1.5fr 1fr 1fr 1.5fr;
+  padding: 18px 22px;
+  align-items: center;
+}
+
+.table-header {
+  background: #f1f5f9;
+  font-weight: 600;
+  color: #1a2b49;
+  font-size: 14px;
+}
+
+.table-row {
+  border-top: 1px solid #eef2f7;
   transition: 0.3s ease;
 }
 
-.chart-box:hover,
-.recent-business:hover,
-.action-card:hover,
-.report-item:hover {
-  transform: translateY(-4px);
+.table-row:hover {
+  background: #f8fafc;
 }
 
-/* =========================
-   NEGOCIOS RECIENTES MEJORADO
-========================= */
-
-.recent-business h3 {
-  font-size: 20px;
-  margin-bottom: 20px;
-}
-
-.recent-business ul {
-  list-style: none;
-  padding: 0;
-}
-
-.recent-business li {
-  padding: 20px 0;
-  border-bottom: 1px solid #eef2f7;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.recent-business li strong {
-  font-size: 17px;
-  color: #1a2b49;
-}
-
-.recent-business li span {
-  font-size: 14px;
+.table-row small {
   color: #7a8ca5;
 }
 
 /* =========================
-   ACTION CARDS HORIZONTALES
+   BADGES
 ========================= */
 
-.bottom-section {
-  display: flex;
-  gap: 25px;
-  margin-bottom: 35px;
+.badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.action-card {
-  flex: 1;
-  min-height: 170px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+.activo {
+  background: #16a34a;
 }
 
-.action-card h3 {
-  font-size: 20px;
-  margin-bottom: 15px;
+.inactivo {
+  background: #9ca3af;
 }
 
-.actions {
+.verificar {
+  background: #f59e0b;
+}
+
+/* =========================
+   ACCIONES
+========================= */
+
+.acciones {
   display: flex;
-  gap: 15px;
+  gap: 10px;
+}
+
+.small {
+  padding: 6px 12px;
+  font-size: 13px;
 }
 
 /* =========================
@@ -353,7 +315,6 @@
 
 .btn-primary:hover {
   background: #133a7c;
-  transform: translateY(-2px);
 }
 
 .btn-dark {
@@ -363,29 +324,36 @@
 
 .btn-dark:hover {
   background: #2c3f66;
-  transform: translateY(-2px);
 }
 
 /* =========================
-   REPORTES
+   PAGINACIÓN
 ========================= */
 
-.reports {
-  display: flex;
-  gap: 22px;
-}
-
-.report-item {
-  flex: 1;
-  min-width: 220px;
+.pagination {
+  margin-top: 25px;
   display: flex;
   justify-content: center;
-  align-items: center;
+  gap: 10px;
+}
+
+.page-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  background: #e2e8f0;
+  cursor: pointer;
   font-weight: 600;
+  transition: 0.3s;
+}
+
+.page-btn.active {
+  background: #0d2b5c;
+  color: white;
 }
 
 /* =========================
-   ANIMACIÓN GENERAL
+   ANIMACIÓN
 ========================= */
 
 @keyframes fadeIn {
@@ -404,20 +372,10 @@
 ========================= */
 
 @media (max-width: 1024px) {
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .middle-section {
+  .table-header,
+  .table-row {
     grid-template-columns: 1fr;
-  }
-
-  .bottom-section {
-    flex-direction: column;
-  }
-
-  .reports {
-    flex-direction: column;
+    gap: 10px;
   }
 }
 
@@ -434,9 +392,5 @@
 
   .sidebar-menu {
     display: none;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
   }
 }
