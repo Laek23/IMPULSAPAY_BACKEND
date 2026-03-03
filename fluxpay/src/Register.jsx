@@ -12,45 +12,49 @@ export default function Register() {
   return (
     <div className="register-page">
 
-      <div className="register-sidebar">
-        <div className="register-logo-container">
-          <img 
-            src="/fluxpay.jpg" 
-            alt="FluxPay Logo" 
-            className="register-logo" 
-          />
+      {/* SECCIÓN IZQUIERDA */}
+      <div className="register-left">
+        <img 
+          src="/fluxpay.jpg" 
+          alt="FluxPay Logo" 
+          className="hero-logo"
+        />
+
+        <h1>
+          Impulsa tu negocio con <span>FluxPay</span>
+        </h1>
+
+        <p>
+          Acepta pagos digitales, genera códigos QR y administra tus 
+          ingresos desde una sola plataforma segura y moderna.
+        </p>
+      </div>
+
+      {/* CARD DERECHA */}
+      <form className="register-card" onSubmit={handleRegister}>
+        <h2>Crear Cuenta</h2>
+
+        <div className="register-grid">
+          <input type="email" placeholder="Correo" required />
+          <input type="text" placeholder="Nombre" required />
+          <input type="password" placeholder="Contraseña" required />
+          <input type="text" placeholder="Banco" required />
+          <input type="text" placeholder="Nombre del negocio" />
+          <input type="text" placeholder="Cuenta bancaria" />
         </div>
-      </div>
 
-      <div className="register-content">
-        <h1 className="register-title">REGISTRARSE</h1>
+        <button type="submit" className="btn-primary">
+          Registrarme
+        </button>
 
-        <form className="register-card" onSubmit={handleRegister}>
-
-          <div className="register-grid">
-
-            <input type="email" placeholder="Correo" className="register-input" required />
-            <input type="text" placeholder="Nombre" className="register-input" required />
-            <input type="password" placeholder="Contraseña" className="register-input" required />
-            <input type="text" placeholder="Banco" className="register-input" required />
-            <input type="text" placeholder="Nombre negocio" className="register-input" />
-            <input type="text" placeholder="Cuenta bancaria" className="register-input" />
-
-          </div>
-
-          <button type="submit" className="register-btn-primary">
-            Crear Cuenta
-          </button>
-
-          <button 
-            type="button"
-            className="register-btn-secondary"
-            onClick={() => navigate("/")}>
-            Volver al Login
-          </button>
-
-        </form>
-      </div>
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={() => navigate("/")}
+        >
+          Volver al Login
+        </button>
+      </form>
     </div>
   );
 }

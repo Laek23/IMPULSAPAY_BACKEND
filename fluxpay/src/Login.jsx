@@ -5,67 +5,73 @@ export default function Login() {
   const navigate = useNavigate();
 
   const handleLogin = (e) => {
-  e.preventDefault();
-
-  // Simulación de administrador
-  navigate("/admin/dashboard");
-};
+    e.preventDefault();
+    navigate("/admin/dashboard");
+  };
 
   return (
-    <div className="login-page">
-      
-      {/* SIDEBAR */}
-      <div className="login-sidebar">
-        <div className="login-logo-container">
-          <img 
-            src="/fluxpay.jpg" 
-            alt="FluxPay Logo" 
-            className="login-logo" 
-          />
-        </div>
-      </div>
+    <div className="login-container">
 
-      {/* CONTENIDO */}
-      <div className="login-content">
-        
-        <div className="login-wrapper">
-          
-          <h1 className="login-title">INICIAR SESIÓN</h1>
+      {/* Fondo con overlay */}
+      <div className="login-overlay">
 
-          <form className="login-card" onSubmit={handleLogin}>
-            
-            <input 
-              type="email" 
-              placeholder="Email" 
-              className="login-input"
-              required
-            />
-
-            <input 
-              type="password" 
-              placeholder="Password" 
-              className="login-input"
-              required
-            />
-
-            <button type="submit" className="login-btn-primary">
-              Iniciar sesión
-            </button>
-
-            <button 
-              type="button"
-              className="login-btn-secondary"
+        {/* Panel izquierdo estilo referencia */}
+        <div className="login-left">
+          <div className="left-content">
+            <h1>
+              Bienvenido a <span>FluxPay</span>
+            </h1>
+            <p>
+              Gestiona tus negocios, analiza ingresos y controla
+              tus transacciones desde un solo lugar.
+            </p>
+            <button
+              className="btn-register"
               onClick={() => navigate("/register")}
             >
               Registrate
             </button>
+          </div>
+        </div>
 
-          </form>
+        {/* Card login derecha */}
+        <div className="login-right">
+          <div className="login-card">
 
-        </div> {/* login-wrapper */}
+            <div className="logo-box">
+              <img
+                src="/fluxpay.jpg"
+                alt="FluxPay Logo"
+                className="login-logo"
+              />
+            </div>
 
-      </div> {/* login-content */}
--m
-    </div> /* login-page */
+            <h2>Iniciar sesión</h2>
+
+            <form onSubmit={handleLogin}>
+              <input
+                type="email"
+                placeholder="Correo electrónico"
+                required
+              />
+
+              <input
+                type="password"
+                placeholder="Contraseña"
+                required
+              />
+
+              <button type="submit" className="btn-login">
+                Iniciar sesión
+              </button>
+
+              <p className="forgot">Olvidé mi contraseña</p>
+            </form>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
   );
 }

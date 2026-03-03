@@ -2,7 +2,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: "Segoe UI", sans-serif;
 }
 
 html, body, #root {
@@ -10,106 +10,160 @@ html, body, #root {
 }
 
 /* CONTENEDOR PRINCIPAL */
-.login-page {
+.login-container {
+  height: 100vh;
+  background: url("https://images.unsplash.com/photo-1522202176988-66273c2fd55f")
+    no-repeat center center/cover;
   display: flex;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
 }
 
-/* SIDEBAR */
-.login-sidebar {
-  width: 340px;
-  background: linear-gradient(180deg, #0d2b5c, #0a1f44);
+/* OVERLAY OSCURO */
+.login-overlay {
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding-top: 60px;
-}
-
-.login-logo-container {
   width: 100%;
-  padding: 20px;
 }
 
-.login-logo {
-  width: 100%;
-  max-width: 300px;
-  border-radius: 28px;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.25);
-}
-
-/* CONTENIDO */
-.login-content {
+/* LADO IZQUIERDO */
+.login-left {
   flex: 1;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding-top: 80px;
-}
-
-/* WRAPPER PARA TITULO + CARD */
-.login-wrapper {
-  display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  padding: 60px;
+  color: white;
 }
 
-/* TITULO */
-.login-title {
-  font-size: 42px;
-  font-weight: 800;
-  margin-bottom: 35px;
-  color: #0d2b5c;
-  text-align: center;
+.left-content {
+  max-width: 450px;
 }
 
-/* TARJETA */
-.login-card {
-  width: 500px;
-  background: white;
-  padding: 60px 50px;
-  border-radius: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  box-shadow: 0 25px 60px rgba(0,0,0,0.12);
+.left-content h1 {
+  font-size: 48px;
+  font-weight: 700;
+  margin-bottom: 20px;
 }
 
-/* INPUTS */
-.login-input {
-  padding: 16px;
-  border-radius: 12px;
-  border: none;
-  font-size: 15px;
-  background: #e5e7eb;
+.left-content span {
+  color: #3b82f6;
 }
 
-/* BOTON PRINCIPAL */
-.login-btn-primary {
+.left-content p {
+  margin-bottom: 30px;
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+.btn-register {
   background: #1e3a8a;
   color: white;
   border: none;
-  padding: 16px;
-  border-radius: 14px;
+  padding: 14px 30px;
+  border-radius: 10px;
   cursor: pointer;
   font-weight: 600;
   transition: 0.3s;
 }
 
-.login-btn-primary:hover {
+.btn-register:hover {
   background: #162c6b;
 }
 
-/* BOTON SECUNDARIO */
-.login-btn-secondary {
-  background: #e2e8f0;
+/* LADO DERECHO */
+.login-right {
+  width: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+/* CARD */
+.login-card {
+  width: 100%;
+  background: #0f2f5f;
+  padding: 50px 40px;
+  border-radius: 20px;
+  color: white;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+}
+
+.login-card h2 {
+  margin-bottom: 25px;
+  font-weight: 600;
+}
+
+.login-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* LOGO */
+.logo-box {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 25px;
+}
+
+.login-logo {
+  width: 160px;
+  border-radius: 15px;
+  background: white;
+  padding: 10px;
+}
+
+/* INPUTS */
+.login-card input {
+  padding: 14px;
+  border-radius: 8px;
   border: none;
-  padding: 16px;
-  border-radius: 14px;
+  font-size: 14px;
+}
+
+/* BOTÓN LOGIN */
+.btn-login {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-weight: 600;
   cursor: pointer;
   transition: 0.3s;
 }
 
-.login-btn-secondary:hover {
-  background: #cbd5e1;
+.btn-login:hover {
+  background: #1e40af;
+}
+
+/* OLVIDÉ */
+.forgot {
+  margin-top: 10px;
+  font-size: 13px;
+  text-align: center;
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 992px) {
+  .login-overlay {
+    flex-direction: column;
+  }
+
+  .login-left {
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .login-right {
+    width: 100%;
+    padding: 20px;
+  }
+
+  .left-content h1 {
+    font-size: 34px;
+  }
 }

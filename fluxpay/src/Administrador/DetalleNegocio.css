@@ -1,0 +1,123 @@
+/* ===== LAYOUT GENERAL ===== */
+
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f4f6f9;
+}
+
+/* ===== MAIN ===== */
+
+.admin-main {
+  flex: 1;
+  padding: 40px;
+}
+
+/* ===== HEADER ===== */
+
+.header-wrapper {
+  margin-bottom: 30px;
+}
+
+.header-wrapper h1 {
+  font-size: 28px;
+  margin-bottom: 5px;
+}
+
+.header-wrapper p {
+  color: #777;
+}
+
+/* ===== CARD PRINCIPAL ===== */
+
+.form-card {
+  background: white;
+  padding: 40px;
+  border-radius: 14px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+
+  display: flex;
+  gap: 60px;
+  align-items: flex-start;
+
+  max-width: 1000px;
+}
+
+/* ===== COLUMNA IZQUIERDA ===== */
+
+.form-left {
+  flex: 1;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.form-group input {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.form-group input:disabled {
+  background: #f1f1f1;
+}
+
+/* ===== BOTONES ===== */
+
+.form-buttons {
+  margin-top: 20px;
+  display: flex;
+  gap: 15px;
+}
+
+.btn-primary {
+  background: #1e3a8a;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-primary:hover {
+  background: #162d6b;
+}
+
+.btn-dark {
+  background: #1f2937;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-dark:hover {
+  background: #111827;
+}
+
+/* ===== COLUMNA DERECHA ===== */
+
+.form-right {
+  width: 250px;
+  text-align: center;
+}
+
+.profile-preview {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
