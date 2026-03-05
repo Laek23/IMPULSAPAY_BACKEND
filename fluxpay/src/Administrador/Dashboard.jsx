@@ -44,29 +44,43 @@ export default function DashboardAdmin() {
 
       <aside className="admin-sidebar">
         <div>
-          <div className="admin-logo-container">
-            <img src="/fluxpay.jpg" alt="FluxPay Logo" className="admin-logo" />
-          </div>
+  <div className="admin-logo-container">
+    <img src="/fluxpay.jpg" alt="FluxPay Logo" className="admin-logo" />
+  </div>
 
-          <ul className="sidebar-menu">
-            <li className="active">
-              <FaHome /> Dashboard
-            </li>
+  <ul className="sidebar-menu">
+    
+    <li
+      className="active"
+      onClick={() => navigate("/admin/dashboard")}
+      style={{ cursor: "pointer" }}
+    >
+      <FaHome /> Dashboard
+    </li>
 
-            {/* 👇 AQUI ESTA EL CAMBIO */}
-            <li onClick={() => navigate("/admin/negocios")} style={{ cursor: "pointer" }}>
-              <FaStore /> Gestión Negocios
-            </li>
+    <li
+      onClick={() => navigate("/admin/negocios")}
+      style={{ cursor: "pointer" }}
+    >
+      <FaStore /> Gestión Negocios
+    </li>
 
-            <li>
-              <FaChartBar /> Reportes globales
-            </li>
+    <li
+      onClick={() => navigate("/admin/reportes")}
+      style={{ cursor: "pointer" }}
+    >
+      <FaChartBar /> Reportes globales
+    </li>
 
-            <li>
-              <FaHeadset /> Soporte
-            </li>
-          </ul>
-        </div>
+    <li
+      onClick={() => navigate("/admin/soporte")}
+      style={{ cursor: "pointer" }}
+    >
+      <FaHeadset /> Soporte
+    </li>
+
+  </ul>
+</div>
 
         <div className="logout">
           <FaSignOutAlt /> Cerrar sesión
@@ -168,7 +182,6 @@ export default function DashboardAdmin() {
               <h3>Gestión de Negocios</h3>
               <div className="actions">
 
-                {/* 👇 TAMBIEN AQUI */}
                 <button 
                   className="btn-primary"
                   onClick={() => navigate("/admin/negocios")}
@@ -186,7 +199,9 @@ export default function DashboardAdmin() {
             <div className="action-card">
               <h3>Centro de soporte</h3>
               <div className="actions">
-                <button className="btn-primary">Ver consultas</button>
+                <button className="btn-primary"
+                    onClick={() => navigate("/admin/soporte")}
+                >Ver consultas</button>
                 <button className="btn-dark">Nuevo ticket</button>
               </div>
             </div>
