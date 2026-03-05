@@ -50,34 +50,47 @@ export default function GestionNegocios() {
     <div className="admin-layout">
 
       <aside className="admin-sidebar">
-        <div>
-          <div className="admin-logo-container">
-            <img src="/fluxpay.jpg" alt="FluxPay Logo" className="admin-logo" />
-          </div>
+  <div>
+    <div className="admin-logo-container">
+      <img src="/fluxpay.jpg" alt="FluxPay Logo" className="admin-logo" />
+    </div>
 
-          <ul className="sidebar-menu">
-            <li onClick={() => navigate("/admin/dashboard")}>
-              <FaHome /> Dashboard
-            </li>
+    <ul className="sidebar-menu">
+      <li
+        onClick={() => navigate("/admin/dashboard")}
+        style={{ cursor: "pointer" }}
+      >
+        <FaHome /> Dashboard
+      </li>
 
-            <li className="active">
-              <FaStore /> Gestión Negocios
-            </li>
+      <li className="active">
+        <FaStore /> Gestión Negocios
+      </li>
 
-            <li>
-              <FaChartBar /> Reportes globales
-            </li>
+      <li
+        onClick={() => navigate("/admin/reportes")}
+        style={{ cursor: "pointer" }}
+      >
+        <FaChartBar /> Reportes globales
+      </li>
 
-            <li>
-              <FaHeadset /> Soporte
-            </li>
-          </ul>
-        </div>
+      <li
+        onClick={() => navigate("/admin/soporte")}
+        style={{ cursor: "pointer" }}
+      >
+        <FaHeadset /> Soporte
+      </li>
+    </ul>
+  </div>
 
-        <div className="logout">
-          <FaSignOutAlt /> Cerrar sesión
-        </div>
-      </aside>
+  <div
+    className="logout"
+    onClick={() => navigate("/login")}
+    style={{ cursor: "pointer" }}
+  >
+    <FaSignOutAlt /> Cerrar sesión
+  </div>
+</aside>
 
       <div className="admin-main">
 

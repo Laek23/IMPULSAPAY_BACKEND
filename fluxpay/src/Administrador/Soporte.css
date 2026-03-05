@@ -1,0 +1,115 @@
+.soporte-stats {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.soporte-filtros {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.soporte-filtros input {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  flex: 1;
+}
+
+.soporte-filtros .btn {
+  padding: 6px 12px;
+  border: none;
+  background: #e0e0e0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.soporte-filtros .btn.active {
+  background: #2f80ed;
+  color: white;
+}
+
+.tickets-table {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+}
+
+.table-header,
+.table-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  padding: 15px 20px;
+  align-items: center;
+}
+
+.table-header {
+  background: #f5f6fa;
+  font-weight: 600;
+}
+
+.table-row {
+  border-top: 1px solid #eee;
+}
+
+.badge {
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+}
+
+.pendiente {
+  background: #c9b300;
+}
+
+.en-curso {
+  background: #2f80ed;
+}
+
+.resuelto {
+  background: #27ae60;
+}
+
+.prioridad.alta {
+  background: #c9b300;
+}
+
+.prioridad.media {
+  background: #f2c94c;
+}
+
+.prioridad.baja {
+  background: #27ae60;
+}
+
+.btn-ver {
+  background: #2f80ed;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.pagination {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.pagination span {
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.pagination .active-page {
+  background: #333;
+  color: white;
+}
