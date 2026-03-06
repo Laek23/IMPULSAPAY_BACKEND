@@ -1,6 +1,7 @@
 import "./DetalleNegocio.css";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
+import Swal from "sweetalert2";
 import {
   FaHome,
   FaStore,
@@ -25,10 +26,46 @@ export default function DetalleNegocio() {
   });
 
   const eliminarNegocio = () => {
-    const confirmar = window.confirm("¿Eliminar este negocio?");
-    if (confirmar) {
-      navigate("/administrador");
-    }
+
+    Swal.fire({
+      title: "¿Eliminar negocio?",
+      text: "Esta acción no se puede deshacer.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#0d2b5c",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar"
+    }).then((result) => {
+
+      if (result.isConfirmed) {
+
+        Swal.fire({
+          icon: "success",
+          title: "Negocio eliminado",
+          text: "El negocio fue eliminado correctamente.",
+          confirmButtonColor: "#0d2b5c"
+        }).then(() => {
+          navigate("/administrador");
+        });
+
+      }
+
+    });
+  };
+
+  const guardarCambios = () => {
+    setEditando(false);
+
+    Swal.fire({
+      icon: "success",
+      title: "Cambios guardados",
+      text: "La información del negocio se actualizó correctamente.",
+      confirmButtonText: "Aceptar",
+      confirmButtonColor: "#0d2b5c",
+      background: "#ffffff",
+      color: "#333"
+    });
   };
 
   return (
@@ -156,10 +193,7 @@ export default function DetalleNegocio() {
                   <>
                     <button
                       className="btn-primary"
-                      onClick={() => {
-                        setEditando(false);
-                        navigate("/administrador");
-                      }}
+                      onClick={guardarCambios}
                     >
                       Guardar cambios
                     </button>

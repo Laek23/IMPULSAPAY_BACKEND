@@ -3,6 +3,7 @@ import Navbar from "../Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Administrador/DashboardAdmin.css";
 import "./Cliente.css";
+import "./clientedashboard.css";
 import { useNavigate } from "react-router-dom";
 import "../Styles/StyleNavbar.css";
 import {
@@ -24,7 +25,7 @@ import { CiCreditCard1 } from "react-icons/ci";
 export default function DashboardCliente() {
   const navigate = useNavigate();
   return (
-    <div className="page">
+    <div className="admin-layout">
       
       {/* Sidebar */}
 <aside className="admin-sidebar">
@@ -73,7 +74,7 @@ export default function DashboardCliente() {
 </aside>
       
       {/* Contenido principal */}
-      <div className="main-content">
+      <div className="admin-main">
 <div className="container-fluid px-4 pt-4">
   <div className="bg-white shadow rounded-4 p-3">
     <Navbar
@@ -83,60 +84,48 @@ export default function DashboardCliente() {
     />
   </div>
 </div>
-        <div className="container center">
+{/* Contenido moderno */}
+<div className="container-fluid dashboard-wrapper">
 
-          <div className="row mt-4">
-        <div className="row mt-4 g-4">
+  <div className="row g-4 mt-3">
 
-  {/* Cuenta Bancaria */}
-  <div className="col-12 col-md-6">
-    <div 
-      className="card dashboard-card cuenta-card"
-      onClick={() => navigate("/Cliente/clienteTarjetas")}
-      style={{ cursor: "pointer" }}
-    >
-      <div className="card-body text-center">
-
-        <div className="dashboard-icon mb-3">
-          <CiCreditCard1 size={45} />
+    {/* Mis Tarjetas */}
+    <div className="col-12 col-md-6 col-lg-4">
+      <div 
+        className="modern-card"
+        onClick={() => navigate("/Cliente/clienteTarjetas")}
+      >
+        <div className="icon-circle blue">
+          <CiCreditCard1 size={28} />
         </div>
 
-        <h5 className="fw-bold">Mis Tarjetas</h5>
-        <p className="text-muted small">
-          Administra tus tarjetas y métodos de pago
-        </p>
-
+        <div className="card-content">
+          <h5>Mis Tarjetas</h5>
+          <p>Administra tus métodos de pago fácilmente</p>
+        </div>
       </div>
     </div>
-  </div>
 
-  {/* Historial */}
-  <div className="col-12 col-md-6">
-    <div 
-      className="card dashboard-card cuenta-card"
-      onClick={() => navigate("/Cliente/HistorialCliente")}
-      style={{ cursor: "pointer" }}
-    >
-      <div className="card-body text-center">
-
-        <div className="dashboard-icon mb-3">
-          <FaHistory size={40} />
+    {/* Historial */}
+    <div className="col-12 col-md-6 col-lg-4">
+      <div 
+        className="modern-card"
+        onClick={() => navigate("/Cliente/HistorialCliente")}
+      >
+        <div className="icon-circle purple">
+          <FaHistory size={26} />
         </div>
 
-        <h5 className="fw-bold">Historial de Pagos</h5>
-        <p className="text-muted small">
-          Consulta todas tus transacciones
-        </p>
-
+        <div className="card-content">
+          <h5>Historial de Pagos</h5>
+          <p>Consulta todas tus transacciones realizadas</p>
+        </div>
       </div>
     </div>
+
   </div>
 
 </div>
-
-
-          </div>
-        </div>
 
       </div>
     </div>

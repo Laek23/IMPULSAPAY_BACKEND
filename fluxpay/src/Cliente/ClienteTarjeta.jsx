@@ -5,6 +5,8 @@ import { useState } from "react";
 import TarjetasCliente from "./TarjetasCliente";
 import { Button, Card, Row, Col } from "react-bootstrap";
 import PaymentForm from "./PaymentForm";
+import "../Administrador/DashboardAdmin.css";
+
 import {
   FaHome,
   FaStore,
@@ -90,8 +92,7 @@ function ClienteTarjeta() {
 </aside>
 
       {/* Contenido principal */}
-      <div className="main-content">
-        
+<div className="main-content">
 <div className="container-fluid px-4 pt-4">
   <div className="bg-white shadow rounded-4 p-3">
     <Navbar
@@ -101,9 +102,9 @@ function ClienteTarjeta() {
     />
   </div>
 </div>
-    <div style={{ width: "400px", margin: "60px auto 0 auto", textAlign: "center" }}>
-        <h1>Mis tarjetas</h1>
-    </div>
+<div className="text-center mt-4 mt-md-5">
+  <h1 className="h3 h-md-2">Mis tarjetas</h1>
+</div>
         <div className="container mt-4">
           <Row className="g-4">
             {tarjetas.length > 0 ? (

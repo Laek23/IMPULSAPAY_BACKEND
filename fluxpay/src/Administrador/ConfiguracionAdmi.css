@@ -1,0 +1,63 @@
+.config-card{
+  background:white;
+  padding:30px;
+  border-radius:18px;
+  box-shadow:0 6px 16px rgba(0,0,0,0.05);
+}
+
+.config-card h2{
+  margin-bottom:25px;
+  color:#0d2b5c;
+}
+
+.config-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:30px;
+}
+
+.config-field{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.config-field label{
+  font-size:14px;
+  color:#6b7c93;
+}
+
+.config-field input{
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #dbe2ea;
+}
+
+.photo-field{
+  grid-column:span 2;
+}
+
+.photo-box{
+  display:flex;
+  align-items:center;
+  gap:20px;
+}
+
+.photo-box img{
+  width:70px;
+  height:70px;
+  border-radius:50%;
+}
+
+.btn-danger{
+  background:#e63946;
+  color:white;
+  border:none;
+  padding:10px 16px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.btn-danger:hover{
+  background:#c62828;
+}

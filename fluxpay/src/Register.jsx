@@ -1,12 +1,22 @@
 import { useNavigate } from "react-router-dom";
 import "./register.css";
+import Swal from "sweetalert2";
 
 export default function Register() {
   const navigate = useNavigate();
 
   const handleRegister = (e) => {
     e.preventDefault();
-    alert("Cuenta creada correctamente");
+
+    Swal.fire({
+      icon: "success",
+      title: "Cuenta creada",
+      text: "Tu cuenta fue registrada correctamente.",
+      confirmButtonText: "Continuar",
+      confirmButtonColor: "#0d2b5c",
+      background: "#ffffff",
+      color: "#333"
+    });
   };
 
   return (

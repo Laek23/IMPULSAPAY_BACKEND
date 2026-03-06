@@ -1,16 +1,58 @@
 import "./AgregarNegocio.css";
 import { useNavigate } from "react-router-dom";
-import { 
-  FaHome, 
-  FaStore, 
-  FaChartBar, 
-  FaHeadset, 
-  FaSignOutAlt 
+import { useState } from "react";
+import Swal from "sweetalert2";
+import {
+  FaHome,
+  FaStore,
+  FaChartBar,
+  FaHeadset,
+  FaSignOutAlt
 } from "react-icons/fa";
 
 export default function AgregarNegocio() {
 
   const navigate = useNavigate();
+
+  const [form, setForm] = useState({
+    nombre: "",
+    apellidos: "",
+    correo: "",
+    banco: "",
+    negocio: "",
+    telefono: ""
+  });
+
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const insertarNegocio = () => {
+
+    const nuevoNegocio = {
+      id: Date.now(),
+      nombre: form.negocio,
+      propietario: form.nombre + " " + form.apellidos,
+      correo: form.correo,
+      estado: "activo",
+      ventas: 0,
+      ingresos: "$0"
+    };
+
+    localStorage.setItem("nuevoNegocio", JSON.stringify(nuevoNegocio));
+
+    Swal.fire({
+      icon: "success",
+      title: "Negocio agregado",
+      text: "El negocio se agregó correctamente.",
+      confirmButtonColor: "#0d2b5c"
+    }).then(() => {
+      navigate("/admin/negocios");
+    });
+  };
 
   return (
     <div className="admin-layout">
@@ -26,10 +68,7 @@ export default function AgregarNegocio() {
               <FaHome /> Dashboard
             </li>
 
-            <li 
-              className="active"
-              onClick={() => navigate("/admin/negocios")}
-            >
+            <li className="active" onClick={() => navigate("/admin/negocios")}>
               <FaStore /> Gestión Negocios
             </li>
 
@@ -65,46 +104,50 @@ export default function AgregarNegocio() {
 
               <div className="form-group">
                 <label>Nombre del cliente</label>
-                <input type="text" placeholder="Eduardo Emmanuel" />
+                <input name="nombre" onChange={handleChange}/>
               </div>
 
               <div className="form-group">
                 <label>Apellidos</label>
-                <input type="text" placeholder="Argaez Castro" />
+                <input name="apellidos" onChange={handleChange}/>
               </div>
 
               <div className="form-group">
-                <label>Correo Electrónico</label>
-                <input type="email" placeholder="correo@gmail.com" />
+                <label>Correo</label>
+                <input name="correo" onChange={handleChange}/>
               </div>
 
               <div className="form-group">
-                <label>Banco registrado</label>
-                <input type="text" placeholder="BBVA" />
+                <label>Banco</label>
+                <input name="banco" onChange={handleChange}/>
               </div>
 
               <div className="form-group">
                 <label>Negocio</label>
-                <input type="text" placeholder="Frutería el angel" />
+                <input name="negocio" onChange={handleChange}/>
               </div>
 
               <div className="form-group">
-                <label>Número de teléfono</label>
-                <input type="text" placeholder="999 327 0981" />
+                <label>Teléfono</label>
+                <input name="telefono" onChange={handleChange}/>
               </div>
 
               <div className="form-buttons">
-                <button className="btn-primary">
+
+                <button
+                  className="btn-primary"
+                  onClick={insertarNegocio}
+                >
                   Insertar negocio
                 </button>
 
-                <button 
-                  type="button"
+                <button
                   className="btn-dark"
                   onClick={() => navigate("/admin/negocios")}
                 >
                   Cancelar
                 </button>
+
               </div>
 
             </div>

@@ -1,20 +1,24 @@
 import "./Soporte.css";
 import { useNavigate } from "react-router-dom";
 import { useState, useMemo } from "react";
+import Swal from "sweetalert2";
 import {
   FaHome,
   FaStore,
   FaChartBar,
   FaHeadset,
   FaSignOutAlt,
+  FaCog
 } from "react-icons/fa";
 
 export default function Soporte() {
   const navigate = useNavigate();
 
-  /* ================= ESTADO ================= */
   const [filtro, setFiltro] = useState("Todos");
   const [busqueda, setBusqueda] = useState("");
+  const [paginaActual, setPaginaActual] = useState(1);
+
+  const ticketsPorPagina = 5;
 
   const [tickets] = useState([
     {
@@ -24,6 +28,7 @@ export default function Soporte() {
       estado: "Pendiente",
       prioridad: "Alta",
       tiempo: "Hace 1 hora",
+      mensaje: "No puedo generar el código QR para recibir pagos en mi negocio."
     },
     {
       id: 2,
@@ -32,6 +37,7 @@ export default function Soporte() {
       estado: "Pendiente",
       prioridad: "Baja",
       tiempo: "Hace 2 horas",
+      mensaje: "No logro conectar mi cuenta bancaria con la plataforma."
     },
     {
       id: 3,
@@ -40,6 +46,7 @@ export default function Soporte() {
       estado: "En curso",
       prioridad: "Media",
       tiempo: "Hace 3 horas",
+      mensaje: "Los pagos aparecen como pendientes aunque ya se realizaron."
     },
     {
       id: 4,
@@ -48,6 +55,7 @@ export default function Soporte() {
       estado: "Pendiente",
       prioridad: "Media",
       tiempo: "Hace 1 día",
+      mensaje: "Necesito ayuda para actualizar los datos de mi negocio."
     },
     {
       id: 5,
@@ -56,10 +64,100 @@ export default function Soporte() {
       estado: "Resuelto",
       prioridad: "Alta",
       tiempo: "Hace 8 horas",
+      mensaje: "Tuve un problema con una transacción duplicada."
+    },
+
+    {
+      id: 6,
+      cliente: "Carlos Vega",
+      negocio: "ElectroShop",
+      estado: "Pendiente",
+      prioridad: "Alta",
+      tiempo: "Hace 4 horas",
+      mensaje: "El sistema no registra algunos pagos realizados."
+    },
+    {
+      id: 7,
+      cliente: "Laura Sánchez",
+      negocio: "Cocina casera",
+      estado: "En curso",
+      prioridad: "Media",
+      tiempo: "Hace 6 horas",
+      mensaje: "Necesito cambiar el correo de mi cuenta."
+    },
+    {
+      id: 8,
+      cliente: "Pedro Castillo",
+      negocio: "Juguetería feliz",
+      estado: "Pendiente",
+      prioridad: "Baja",
+      tiempo: "Hace 5 horas",
+      mensaje: "No puedo actualizar los precios de mis productos."
+    },
+    {
+      id: 9,
+      cliente: "Lucía Torres",
+      negocio: "Papelería escolar",
+      estado: "Resuelto",
+      prioridad: "Media",
+      tiempo: "Hace 10 horas",
+      mensaje: "Se solucionó el problema con el QR."
+    },
+    {
+      id: 10,
+      cliente: "Mario León",
+      negocio: "Zapatería León",
+      estado: "Pendiente",
+      prioridad: "Alta",
+      tiempo: "Hace 2 días",
+      mensaje: "Error al generar reportes de ventas."
+    },
+    {
+      id: 11,
+      cliente: "Fernando Díaz",
+      negocio: "Tech World",
+      estado: "En curso",
+      prioridad: "Alta",
+      tiempo: "Hace 12 horas",
+      mensaje: "Mi cuenta aparece suspendida sin motivo."
+    },
+    {
+      id: 12,
+      cliente: "Sofía Herrera",
+      negocio: "MiniMarket Centro",
+      estado: "Pendiente",
+      prioridad: "Media",
+      tiempo: "Hace 7 horas",
+      mensaje: "No aparecen mis ventas del día."
+    },
+    {
+      id: 13,
+      cliente: "Luis Gómez",
+      negocio: "Panadería Sol",
+      estado: "Resuelto",
+      prioridad: "Baja",
+      tiempo: "Hace 1 día",
+      mensaje: "Consulta sobre métodos de pago."
+    },
+    {
+      id: 14,
+      cliente: "Andrea Ruiz",
+      negocio: "Boutique Glam",
+      estado: "Pendiente",
+      prioridad: "Alta",
+      tiempo: "Hace 3 horas",
+      mensaje: "Error al retirar dinero a mi banco."
+    },
+    {
+      id: 15,
+      cliente: "Daniel Ortiz",
+      negocio: "Farmacia Vida",
+      estado: "En curso",
+      prioridad: "Media",
+      tiempo: "Hace 9 horas",
+      mensaje: "No puedo cambiar la contraseña."
     },
   ]);
-
-  /* ================= FILTRADO DINÁMICO ================= */
 
   const ticketsFiltrados = useMemo(() => {
     return tickets.filter((t) => {
@@ -76,22 +174,44 @@ export default function Soporte() {
     });
   }, [tickets, busqueda, filtro]);
 
-  /* ================= ESTADÍSTICAS AUTOMÁTICAS ================= */
+  const indiceUltimo = paginaActual * ticketsPorPagina;
+  const indicePrimero = indiceUltimo - ticketsPorPagina;
+
+  const ticketsActuales = ticketsFiltrados.slice(indicePrimero, indiceUltimo);
+  const totalPaginas = Math.ceil(ticketsFiltrados.length / ticketsPorPagina);
 
   const total = tickets.length;
   const pendientes = tickets.filter((t) => t.estado === "Pendiente").length;
   const enCurso = tickets.filter((t) => t.estado === "En curso").length;
   const resueltas = tickets.filter((t) => t.estado === "Resuelto").length;
 
+  const verTicket = (ticket) => {
+    Swal.fire({
+      title: `Ticket #${ticket.id}`,
+      html: `
+        <b>Cliente:</b> ${ticket.cliente}<br>
+        <b>Negocio:</b> ${ticket.negocio}<br><br>
+        <b>Problema:</b><br>${ticket.mensaje}
+      `,
+      icon: "info",
+      confirmButtonText: "Cerrar",
+      confirmButtonColor: "#0d2b5c"
+    });
+  };
+
   return (
     <div className="admin-layout">
+
       <aside className="admin-sidebar">
+
         <div>
+
           <div className="admin-logo-container">
             <img src="/fluxpay.jpg" alt="FluxPay Logo" className="admin-logo" />
           </div>
 
           <ul className="sidebar-menu">
+
             <li onClick={() => navigate("/admin/dashboard")}>
               <FaHome /> Dashboard
             </li>
@@ -107,19 +227,35 @@ export default function Soporte() {
             <li className="active">
               <FaHeadset /> Soporte
             </li>
+
           </ul>
+
         </div>
 
-        <div
-          className="logout"
-          onClick={() => navigate("/")}
-          style={{ cursor: "pointer" }}
-        >
-          <FaSignOutAlt /> Cerrar sesión
+        <div>
+
+          <ul className="sidebar-menu">
+
+            <li onClick={() => navigate("/admin/configuracion")}>
+              <FaCog /> Configuración
+            </li>
+
+          </ul>
+
+          <div
+            className="logout"
+            onClick={() => navigate("/")}
+            style={{ cursor: "pointer" }}
+          >
+            <FaSignOutAlt /> Cerrar sesión
+          </div>
+
         </div>
+
       </aside>
 
       <div className="admin-main">
+
         <header className="header-wrapper">
           <div className="header-left">
             <h1>Centro soporte</h1>
@@ -136,7 +272,7 @@ export default function Soporte() {
         </header>
 
         <main className="admin-dashboard">
-          {/* ====== ESTADÍSTICAS DINÁMICAS ====== */}
+
           <div className="soporte-stats">
             <div>Total consultas: {total}</div>
             <div>Pendientes: {pendientes}</div>
@@ -144,8 +280,8 @@ export default function Soporte() {
             <div>Resueltas: {resueltas}</div>
           </div>
 
-          {/* ====== FILTROS ====== */}
           <div className="soporte-filtros">
+
             <input
               placeholder="Buscar negocio o cliente"
               value={busqueda}
@@ -157,16 +293,20 @@ export default function Soporte() {
                 <button
                   key={tipo}
                   className={`btn ${filtro === tipo ? "active" : ""}`}
-                  onClick={() => setFiltro(tipo)}
+                  onClick={() => {
+                    setFiltro(tipo);
+                    setPaginaActual(1);
+                  }}
                 >
                   {tipo}
                 </button>
               )
             )}
+
           </div>
 
-          {/* ====== TABLA DINÁMICA ====== */}
           <div className="tickets-table">
+
             <div className="table-header">
               <div>Cliente</div>
               <div>Estado</div>
@@ -175,60 +315,73 @@ export default function Soporte() {
               <div>Acciones</div>
             </div>
 
-            {ticketsFiltrados.length === 0 ? (
-              <div className="table-row">
-                <div style={{ gridColumn: "1 / -1", textAlign: "center" }}>
-                  No se encontraron tickets
+            {ticketsActuales.map((t) => (
+              <div key={t.id} className="table-row">
+
+                <div>
+                  <strong>{t.cliente}</strong>
+                  <br />
+                  <small>{t.negocio}</small>
                 </div>
+
+                <div>
+                  <span className={`badge ${t.estado.toLowerCase().replace(" ","-")}`}>
+                    {t.estado}
+                  </span>
+                </div>
+
+                <div>
+                  <span className={`badge prioridad ${t.prioridad.toLowerCase()}`}>
+                    {t.prioridad}
+                  </span>
+                </div>
+
+                <div>{t.tiempo}</div>
+
+                <div>
+                  <button
+                    className="btn-ver"
+                    onClick={() => verTicket(t)}
+                  >
+                    Ver ticket
+                  </button>
+                </div>
+
               </div>
-            ) : (
-              ticketsFiltrados.map((t) => (
-                <div key={t.id} className="table-row">
-                  <div>
-                    <strong>{t.cliente}</strong>
-                    <br />
-                    <small>{t.negocio}</small>
-                  </div>
+            ))}
 
-                  <div>
-                    <span
-                      className={`badge ${t.estado
-                        .toLowerCase()
-                        .replace(" ", "-")}`}
-                    >
-                      {t.estado}
-                    </span>
-                  </div>
-
-                  <div>
-                    <span
-                      className={`badge prioridad ${t.prioridad.toLowerCase()}`}
-                    >
-                      {t.prioridad}
-                    </span>
-                  </div>
-
-                  <div>{t.tiempo}</div>
-
-                  <div>
-                    <button
-                      className="btn-ver"
-                      onClick={() => alert(`Abriendo ticket #${t.id}`)}
-                    >
-                      Ver ticket
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
           </div>
 
-          {/* ====== PAGINACIÓN SIMULADA ====== */}
           <div className="pagination">
-            <span className="active-page">1</span>
-            <span>2</span>
-            <span>3</span>
+
+            <button
+              className="page-btn"
+              onClick={() => setPaginaActual(paginaActual - 1)}
+              disabled={paginaActual === 1}
+            >
+              {"<"}
+            </button>
+
+            {[...Array(totalPaginas)].map((_, i) => (
+              <button
+                key={i}
+                className={`page-btn ${paginaActual === i + 1 ? "active" : ""}`}
+                onClick={() => setPaginaActual(i + 1)}
+              >
+                {i + 1}
+              </button>
+            ))}
+
+            <button
+              className="page-btn"
+              onClick={() => setPaginaActual(paginaActual + 1)}
+              disabled={paginaActual === totalPaginas}
+            >
+              {">"}
+            </button>
+
           </div>
+
         </main>
       </div>
     </div>

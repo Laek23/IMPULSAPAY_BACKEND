@@ -13,7 +13,8 @@ import {
   FaBell,
   FaDollarSign,
   FaShoppingCart,
-  FaUsers
+  FaUsers,
+  FaCog
 } from "react-icons/fa";
 
 export default function DashboardAdmin() {
@@ -44,47 +45,66 @@ export default function DashboardAdmin() {
 
       <aside className="admin-sidebar">
         <div>
-  <div className="admin-logo-container">
-    <img src="/fluxpay.jpg" alt="FluxPay Logo" className="admin-logo" />
-  </div>
+          <div className="admin-logo-container">
+            <img src="/fluxpay.jpg" alt="FluxPay Logo" className="admin-logo" />
+          </div>
 
-  <ul className="sidebar-menu">
-    
-    <li
-      className="active"
-      onClick={() => navigate("/admin/dashboard")}
-      style={{ cursor: "pointer" }}
-    >
-      <FaHome /> Dashboard
-    </li>
+          <ul className="sidebar-menu">
+            
+            <li
+              className="active"
+              onClick={() => navigate("/admin/dashboard")}
+              style={{ cursor: "pointer" }}
+            >
+              <FaHome /> Dashboard
+            </li>
 
-    <li
-      onClick={() => navigate("/admin/negocios")}
-      style={{ cursor: "pointer" }}
-    >
-      <FaStore /> Gestión Negocios
-    </li>
+            <li
+              onClick={() => navigate("/admin/negocios")}
+              style={{ cursor: "pointer" }}
+            >
+              <FaStore /> Gestión Negocios
+            </li>
 
-    <li
-      onClick={() => navigate("/admin/reportes")}
-      style={{ cursor: "pointer" }}
-    >
-      <FaChartBar /> Reportes globales
-    </li>
+            <li
+              onClick={() => navigate("/admin/reportes")}
+              style={{ cursor: "pointer" }}
+            >
+              <FaChartBar /> Reportes globales
+            </li>
 
-    <li
-      onClick={() => navigate("/admin/soporte")}
-      style={{ cursor: "pointer" }}
-    >
-      <FaHeadset /> Soporte
-    </li>
+            <li
+              onClick={() => navigate("/admin/soporte")}
+              style={{ cursor: "pointer" }}
+            >
+              <FaHeadset /> Soporte
+            </li>
 
-  </ul>
-</div>
-
-        <div className="logout">
-          <FaSignOutAlt /> Cerrar sesión
+          </ul>
         </div>
+
+        {/* PARTE INFERIOR DEL SIDEBAR */}
+        <div>
+
+          <ul className="sidebar-menu">
+            <li
+              onClick={() => navigate("/admin/configuracion")}
+              style={{ cursor: "pointer" }}
+            >
+              <FaCog /> Configuración
+            </li>
+          </ul>
+
+          <div
+            className="logout"
+            onClick={() => navigate("/")}
+            style={{ cursor: "pointer" }}
+          >
+            <FaSignOutAlt /> Cerrar sesión
+          </div>
+
+        </div>
+
       </aside>
 
       <div className="admin-main">
@@ -199,9 +219,12 @@ export default function DashboardAdmin() {
             <div className="action-card">
               <h3>Centro de soporte</h3>
               <div className="actions">
-                <button className="btn-primary"
-                    onClick={() => navigate("/admin/soporte")}
-                >Ver consultas</button>
+                <button 
+                  className="btn-primary"
+                  onClick={() => navigate("/admin/soporte")}
+                >
+                  Ver consultas
+                </button>
                 <button className="btn-dark">Nuevo ticket</button>
               </div>
             </div>

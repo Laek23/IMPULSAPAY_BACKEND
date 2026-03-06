@@ -1,0 +1,87 @@
+/* ========================= */
+/* DASHBOARD MODERNO CLIENTE */
+/* ========================= */
+
+.dashboard-wrapper {
+  padding: 30px 40px;
+}
+
+/* Tarjeta moderna */
+.modern-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 30px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+  height: 100%;
+}
+
+.modern-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+/* Iconos */
+.icon-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.icon-circle.blue {
+  background: linear-gradient(135deg, #1d4ed8, #2563eb);
+}
+
+.icon-circle.purple {
+  background: linear-gradient(135deg, #7c3aed, #9333ea);
+}
+
+/* Texto */
+.card-content h5 {
+  font-weight: 700;
+  margin-bottom: 5px;
+  color: #1f2937;
+}
+
+.card-content p {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* RESPONSIVE */
+
+/* ===== RESPONSIVE SIN CAMBIAR CLASES ===== */
+
+/* FIX RESPONSIVE DASHBOARD */
+
+@media (max-width: 768px){
+
+  .page .admin-sidebar{
+    width: 70px;
+  }
+
+  .page .main-content{
+    margin-left: 70px;
+    width: calc(100% - 70px);
+  }
+
+}
+
+@media (max-width: 480px){
+
+  .page .main-content{
+    margin-left: 70px;
+    width: calc(100% - 70px);
+  }
+
+}

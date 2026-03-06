@@ -16,6 +16,7 @@ import AgregarNegocio from "./Administrador/AgregarNegocio";
 import DetalleNegocio from "./Administrador/DetalleNegocio";
 import ReportesGlobales from "./Administrador/ReportesGlobales";
 import Soporte from "./Administrador/Soporte";
+import ConfiguracionAdmi from "./Administrador/ConfiguracionAdmi";
 
 /* ================= NEGOCIO ================= */
 import DashboardNegocio from "./Negocio/Dashboard";
@@ -49,6 +50,7 @@ function App() {
       <Route path="/admin/negocio/:id" element={<DetalleNegocio />} />
       <Route path="/admin/reportes" element={<ReportesGlobales />} />
       <Route path="/admin/soporte" element={<Soporte />} />
+     <Route path="/admin/configuracion" element={<ConfiguracionAdmi />} />
 
       {/* ================= NEGOCIO ================= */}
       <Route path="/negocio" element={<LayoutNegocio />}>

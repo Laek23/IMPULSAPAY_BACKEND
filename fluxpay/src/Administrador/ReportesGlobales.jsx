@@ -13,7 +13,7 @@ import {
   FaSignOutAlt,
   FaArrowUp,
   FaFileExcel,
-  FaSearch
+  FaCog
 } from "react-icons/fa";
 
 function ReportesGlobales() {
@@ -21,10 +21,16 @@ function ReportesGlobales() {
   const [filtroActivo, setFiltroActivo] = useState("Día");
   const [busqueda, setBusqueda] = useState("");
 
-  const datosGrafica = {
+  const datosIngresos = {
     Día: [1200, 1500, 1100, 1800, 1600, 2100, 1900],
     Semana: [8200, 7600, 9100, 10500],
     Mes: [32000, 41000, 38000, 45000]
+  };
+
+  const datosVentas = {
+    Día: [120, 150, 110, 180, 160, 210, 190],
+    Semana: [820, 760, 910, 1050],
+    Mes: [3200, 4100, 3800, 4500]
   };
 
   const categorias =
@@ -35,34 +41,37 @@ function ReportesGlobales() {
       : ["Ene", "Feb", "Mar", "Abr"];
 
   const chartOptions = {
-    chart: { type: "area", toolbar: { show: false } },
-    dataLabels: { enabled: false },
-    stroke: { curve: "smooth", width: 3 },
-    xaxis: { categories: categorias },
-    colors: ["#0d2b5c"],
-    fill: {
-      type: "gradient",
-      gradient: {
-        shadeIntensity: 1,
-        opacityFrom: 0.4,
-        opacityTo: 0.05
+    chart: { type: "bar", toolbar: { show: false } },
+    plotOptions: {
+      bar: {
+        borderRadius: 6,
+        columnWidth: "45%"
       }
+    },
+    dataLabels: { enabled: false },
+    xaxis: { categories: categorias },
+    colors: ["#1e88e5", "#2ecc71"], // azul ingresos, verde ventas
+    legend: {
+      position: "top"
     }
   };
 
   const chartSeries = [
     {
       name: "Ingresos",
-      data: datosGrafica[filtroActivo]
+      data: datosIngresos[filtroActivo]
+    },
+    {
+      name: "Ventas",
+      data: datosVentas[filtroActivo]
     }
   ];
-
-  /* ================= EXPORTAR EXCEL ================= */
 
   const exportarExcel = () => {
     const datos = categorias.map((item, index) => ({
       Periodo: item,
-      Ingresos: datosGrafica[filtroActivo][index]
+      Ingresos: datosIngresos[filtroActivo][index],
+      Ventas: datosVentas[filtroActivo][index]
     }));
 
     const hoja = XLSX.utils.json_to_sheet(datos);
@@ -85,8 +94,6 @@ function ReportesGlobales() {
     );
   };
 
-  /* ================= BUSCADOR DINÁMICO ================= */
-
   const ventas = [
     { fecha: "24/04/2026", negocio: "Café El Roble", metodo: "QR", monto: 320 },
     { fecha: "24/04/2026", negocio: "Moda Express", metodo: "Efectivo", monto: 500 }
@@ -98,14 +105,18 @@ function ReportesGlobales() {
 
   return (
     <div className="admin-layout">
+
       {/* SIDEBAR */}
       <aside className="admin-sidebar">
+
         <div>
+
           <div className="admin-logo-container">
             <img src="/fluxpay.jpg" alt="FluxPay" className="admin-logo" />
           </div>
 
           <ul className="sidebar-menu">
+
             <li onClick={() => navigate("/admin/dashboard")}>
               <FaHome /> Dashboard
             </li>
@@ -121,19 +132,33 @@ function ReportesGlobales() {
             <li onClick={() => navigate("/admin/soporte")}>
               <FaHeadset /> Soporte
             </li>
+
           </ul>
+
         </div>
 
-        <div className="logout">
-          <FaSignOutAlt /> Cerrar sesión
+        {/* PARTE INFERIOR DEL SIDEBAR */}
+        <div>
+
+          <ul className="sidebar-menu">
+            <li onClick={() => navigate("/admin/configuracion")}>
+              <FaCog /> Configuración
+            </li>
+          </ul>
+
+          <div className="logout" onClick={() => navigate("/login")}>
+            <FaSignOutAlt /> Cerrar sesión
+          </div>
+
         </div>
+
       </aside>
 
       {/* CONTENIDO */}
       <div className="admin-main">
 
-        {/* HEADER MEJORADO */}
         <header className="header-wrapper">
+
           <div className="header-left">
             <h1>Reportes globales</h1>
             <p>Administra todos los reportes globales</p>
@@ -144,16 +169,19 @@ function ReportesGlobales() {
               <span className="p-name">Alexander Castillo</span>
               <span className="p-role">Administrador</span>
             </div>
+
             <img
               src="https://i.pravatar.cc/150?u=alex"
               alt="User"
               className="p-avatar"
             />
           </div>
+
         </header>
 
         {/* TARJETAS */}
         <div className="stats-grid">
+
           <div className="stat-card">
             <h3>Ingresos totales</h3>
             <p className="stat-value">$128,900</p>
@@ -176,20 +204,22 @@ function ReportesGlobales() {
             <h3>Pagos en efectivo</h3>
             <p className="stat-value">720</p>
           </div>
+
         </div>
 
         {/* GRAFICA */}
         <div className="card">
+
           <div className="card-header">
+
             <h3>Ingresos y ventas</h3>
 
             <div className="filters">
+
               {["Día", "Semana", "Mes"].map((item) => (
                 <button
                   key={item}
-                  className={`filter-btn ${
-                    filtroActivo === item ? "active" : ""
-                  }`}
+                  className={`filter-btn ${filtroActivo === item ? "active" : ""}`}
                   onClick={() => setFiltroActivo(item)}
                 >
                   {item}
@@ -199,21 +229,27 @@ function ReportesGlobales() {
               <button className="excel-btn" onClick={exportarExcel}>
                 <FaFileExcel /> Exportar Excel
               </button>
+
             </div>
+
           </div>
 
           <Chart
             options={chartOptions}
             series={chartSeries}
-            type="area"
+            type="bar"
             height={280}
           />
+
         </div>
 
         {/* TABLA RESUMEN */}
         <div className="card">
+
           <h3>Resumen de pagos</h3>
+
           <table className="table">
+
             <thead>
               <tr>
                 <th>Método</th>
@@ -222,38 +258,48 @@ function ReportesGlobales() {
                 <th>Última actualización</th>
               </tr>
             </thead>
+
             <tbody>
+
               <tr>
                 <td>QR Pagos</td>
                 <td>1,800</td>
                 <td>$85,320</td>
                 <td>Hace 1 hora</td>
               </tr>
+
               <tr>
                 <td>Efectivo</td>
                 <td>720</td>
                 <td>$43,530</td>
                 <td>Hace 3 horas</td>
               </tr>
+
               <tr className="total-row">
                 <td>Total</td>
                 <td>2,520</td>
                 <td>$128,900</td>
                 <td></td>
               </tr>
+
             </tbody>
+
           </table>
+
         </div>
 
-        {/* RECIENTES DINÁMICO */}
+        {/* RECIENTES */}
         <div className="card">
+
           <div className="card-header">
             <h3>Ventas y cobros recientes</h3>
             <button className="view-all">Ver todos</button>
           </div>
 
           <table className="table">
+
             <tbody>
+
               {ventasFiltradas.length === 0 ? (
                 <tr>
                   <td colSpan="4" style={{ textAlign: "center" }}>
@@ -270,9 +316,13 @@ function ReportesGlobales() {
                   </tr>
                 ))
               )}
+
             </tbody>
+
           </table>
+
         </div>
+
       </div>
     </div>
   );
