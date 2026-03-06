@@ -1,23 +1,43 @@
 import { Modal, Button, Form } from "react-bootstrap";
 import { useState } from "react";
+import Swal from "sweetalert2";
 
 const ChangeEmailModal = ({ show, handleClose, currentPassword, onSave }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSubmit = () => {
+
     if (!email || !password) {
-      alert("Completa todos los campos");
+      Swal.fire({
+        icon: "warning",
+        title: "Campos incompletos",
+        text: "Completa todos los campos",
+        confirmButtonText: "Aceptar"
+      });
       return;
     }
 
     if (password !== currentPassword) {
-      alert("Contraseña incorrecta");
+      Swal.fire({
+        icon: "error",
+        title: "Contraseña incorrecta",
+        text: "La contraseña actual no es correcta",
+        confirmButtonText: "Aceptar"
+      });
       return;
     }
 
     onSave(email);
     handleClose();
+
+    Swal.fire({
+      icon: "success",
+      title: "Cambios guardados",
+      text: "El correo se actualizó correctamente.",
+      confirmButtonText: "Aceptar",
+      confirmButtonColor: "#0d3b66"
+    });
   };
 
   return (
@@ -46,10 +66,11 @@ const ChangeEmailModal = ({ show, handleClose, currentPassword, onSave }) => {
         </Form.Group>
       </Modal.Body>
 
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
+      <Modal.Footer className="d-flex justify-content-end gap-3">
+        <Button variant="outline-secondary" onClick={handleClose}>
           Cancelar
         </Button>
+
         <Button variant="primary" onClick={handleSubmit}>
           Confirmar
         </Button>

@@ -1,5 +1,6 @@
 import { Modal, Button, Form } from "react-bootstrap";
 import { useState } from "react";
+import Swal from "sweetalert2";
 
 const ChangePasswordModal = ({ show, handleClose, currentPassword, onSave }) => {
   const [current, setCurrent] = useState("");
@@ -7,23 +8,47 @@ const ChangePasswordModal = ({ show, handleClose, currentPassword, onSave }) => 
   const [confirm, setConfirm] = useState("");
 
   const handleSubmit = () => {
+
     if (!current || !newPass || !confirm) {
-      alert("Completa todos los campos");
+      Swal.fire({
+        icon: "warning",
+        title: "Campos incompletos",
+        text: "Completa todos los campos",
+        confirmButtonText: "Aceptar"
+      });
       return;
     }
 
     if (current !== currentPassword) {
-      alert("Contraseña actual incorrecta");
+      Swal.fire({
+        icon: "error",
+        title: "Contraseña incorrecta",
+        text: "La contraseña actual no es correcta",
+        confirmButtonText: "Aceptar"
+      });
       return;
     }
 
     if (newPass !== confirm) {
-      alert("Las contraseñas no coinciden");
+      Swal.fire({
+        icon: "error",
+        title: "Las contraseñas no coinciden",
+        text: "Verifica la nueva contraseña",
+        confirmButtonText: "Aceptar"
+      });
       return;
     }
 
     onSave(newPass);
     handleClose();
+
+    Swal.fire({
+      icon: "success",
+      title: "Cambios guardados",
+      text: "La información del negocio se actualizó correctamente.",
+      confirmButtonText: "Aceptar",
+      confirmButtonColor: "#0d3b66"
+    });
   };
 
   return (
@@ -61,14 +86,15 @@ const ChangePasswordModal = ({ show, handleClose, currentPassword, onSave }) => 
         </Form.Group>
       </Modal.Body>
 
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
-          Cancelar
-        </Button>
-        <Button variant="danger" onClick={handleSubmit}>
-          Actualizar
-        </Button>
-      </Modal.Footer>
+<Modal.Footer className="d-flex justify-content-end align-items-center gap-3">
+  <Button variant="outline-secondary" onClick={handleClose}>
+    Cancelar
+  </Button>
+
+  <Button variant="primary" onClick={handleSubmit}>
+    Guardar
+  </Button>
+</Modal.Footer>
     </Modal>
   );
 };

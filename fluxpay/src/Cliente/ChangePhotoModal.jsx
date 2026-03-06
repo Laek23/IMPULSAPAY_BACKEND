@@ -1,10 +1,10 @@
 import { Modal, Button, Form, Image } from "react-bootstrap";
 import { useState, useEffect } from "react";
+import Swal from "sweetalert2";
 
 const ChangePhotoModal = ({ show, handleClose, currentPhoto, onSave }) => {
   const [preview, setPreview] = useState(null);
 
-  // Resetear preview cuando se cierre
   useEffect(() => {
     if (!show) {
       setPreview(null);
@@ -25,14 +25,30 @@ const ChangePhotoModal = ({ show, handleClose, currentPhoto, onSave }) => {
   };
 
   const handleSave = () => {
-    if (preview) {
-      onSave(preview);
+    if (!preview) {
+      Swal.fire({
+        icon: "warning",
+        title: "Selecciona una imagen",
+        text: "Debes elegir una foto antes de guardar",
+        confirmButtonColor: "#0d6efd"
+      });
+      return;
     }
+
+    onSave(preview);
+
+    Swal.fire({
+      icon: "success",
+      title: "Foto actualizada",
+      text: "Tu foto de perfil se actualizó correctamente",
+      confirmButtonColor: "#0d6efd"
+    });
+
     handleClose();
   };
 
   return (
-    <Modal show={show} onHide={handleClose} centered>
+    <Modal show={show} onHide={handleClose} centered backdrop="static">
       <Modal.Header closeButton>
         <Modal.Title className="fw-bold">Cambiar foto</Modal.Title>
       </Modal.Header>
@@ -69,11 +85,20 @@ const ChangePhotoModal = ({ show, handleClose, currentPhoto, onSave }) => {
         />
       </Modal.Body>
 
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
+      <Modal.Footer className="border-0 d-flex justify-content-end gap-3">
+        <Button
+          variant="outline-secondary"
+          onClick={handleClose}
+          className="rounded-pill"
+        >
           Cancelar
         </Button>
-        <Button variant="primary" onClick={handleSave}>
+
+        <Button
+          variant="primary"
+          onClick={handleSave}
+          className="rounded-pill"
+        >
           Guardar cambios
         </Button>
       </Modal.Footer>

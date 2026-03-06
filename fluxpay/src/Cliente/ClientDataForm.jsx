@@ -1,9 +1,16 @@
 import { Modal, Button, Form } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import { FaSave } from "react-icons/fa";
+import Swal from "sweetalert2";
 
 const ClientDataForm = ({
-  show, handleClose,title,label,type = "text",value,onSave,
+  show,
+  handleClose,
+  title,
+  label,
+  type = "text",
+  value,
+  onSave,
 }) => {
   const [inputValue, setInputValue] = useState("");
 
@@ -12,8 +19,27 @@ const ClientDataForm = ({
   }, [value]);
 
   const handleSubmit = () => {
+
+    if (!inputValue.trim()) {
+      Swal.fire({
+        icon: "warning",
+        title: "Campo vacío",
+        text: "Debes completar el campo antes de guardar",
+        confirmButtonText: "Aceptar"
+      });
+      return;
+    }
+
     onSave(inputValue);
     handleClose();
+
+    Swal.fire({
+      icon: "success",
+      title: "Cambios guardados",
+      text: "La información se actualizó correctamente.",
+      confirmButtonText: "Aceptar",
+      confirmButtonColor: "#0d3b66"
+    });
   };
 
   return (
@@ -40,9 +66,9 @@ const ClientDataForm = ({
       </Modal.Body>
 
       {type !== "file" && (
-        <Modal.Footer className="border-0">
+        <Modal.Footer className="border-0 d-flex justify-content-end gap-3">
           <Button
-            variant="secondary"
+            variant="outline-secondary"
             onClick={handleClose}
             className="rounded-pill"
           >

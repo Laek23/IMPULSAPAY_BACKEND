@@ -154,7 +154,7 @@ function ClienteConfiguracion() {
                   <FaLock className="me-2 text-danger" />
                   Contraseña
                 </Form.Label>
-                <Form.Control value="********" readOnly />
+<Form.Control value={"*".repeat(user.password.length)} readOnly />
                 <Button
                   size="sm"
                   variant="danger"
