@@ -43,19 +43,22 @@ export default function LayoutNegocio() {
                                     <FaBox /> <span>Productos</span>
                                 </NavLink>
                             </li>
-
-                            <li className="menu-item-static">
-                                <FaQrcode /> <span>QR</span>
+                            <li>
+                                {/* Al usar NavLink sin 'state', cargará la vista de "Gestión" (la de tu imagen) */}
+                                <NavLink to="/Negocio/QR">
+                                    <FaQrcode /> <span>QR</span>
+                                </NavLink>
                             </li>
-
                             <li>
                                 <NavLink to="/Negocio/Historial">
                                     <FaHistory /> <span>Historial</span>
                                 </NavLink>
                             </li>
 
-                            <li className="menu-item-static">
-                                <FaUsers /> <span>Clientes</span>
+                            <li>
+                                <NavLink to="/Negocio/Clientes">
+                                    <FaUsers /> <span>Clientes</span>
+                                </NavLink>
                             </li>
 
                             <li>

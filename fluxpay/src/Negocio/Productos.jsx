@@ -1,12 +1,20 @@
 import React, { useState } from "react";
-import { FaPlus, FaTrash, FaEdit, FaSmile, FaExclamationTriangle } from "react-icons/fa";
+import { 
+  FaPlus, FaTrash, FaEdit, FaSmile, FaExclamationTriangle,
+  FaChevronLeft, FaChevronRight 
+} from "react-icons/fa";
 
 export default function ProductosNegocio() {
+  // --- ESTADOS ---
   const [showModal, setShowModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false); // Estado para el modal de eliminar
-  const [productoAEliminar, setProductoAEliminar] = useState(null); // Producto seleccionado para borrar
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [productoAEliminar, setProductoAEliminar] = useState(null);
   const [editandoId, setEditandoId] = useState(null);
   const [emojiSeleccionado, setEmojiSeleccionado] = useState("🛍️");
+
+  // Estados de Paginación
+  const [paginaActual, setPaginaActual] = useState(1);
+  const ITEMS_POR_PAGINA = 5;
 
   const colores = {
     primario: "#0e2a5a",
@@ -15,7 +23,7 @@ export default function ProductosNegocio() {
     fondoCapa: "#eef2f7",
     fondoCírculo: "#f0f4f9", 
     textoGris: "#64748b",
-    eliminar: "#ef4444" // Color rojo solo para eliminar
+    eliminar: "#ef4444"
   };
 
   const opcionesEmojis = ["🥡", "🍪", "🥤", "🍬", "🍞", "🍎", "🍕", "🍦", "🍟", "🛍️"];
@@ -24,20 +32,24 @@ export default function ProductosNegocio() {
     { id: 1, name: "Galletas", units: 10, income: "$1912", emoji: "🍪" },
     { id: 2, name: "Sabritas", units: 12, income: "$1121", emoji: "🥡" },
     { id: 3, name: "Refrescos", units: 6, income: "$871", emoji: "🥤" },
+    { id: 4, name: "Pan Dulce", units: 20, income: "$450", emoji: "🍞" },
+    { id: 5, name: "Jugos", units: 15, income: "$300", emoji: "🍎" },
+    { id: 6, name: "Helados", units: 8, income: "$240", emoji: "🍦" },
   ]);
 
-  // Lógica para abrir confirmación de eliminación
-  const confirmarEliminacion = (producto) => {
-    setProductoAEliminar(producto);
-    setShowDeleteModal(true);
+  // --- LÓGICA DE PAGINACIÓN ---
+  const totalPaginas = Math.ceil(productos.length / ITEMS_POR_PAGINA);
+  const indiceUltimo = paginaActual * ITEMS_POR_PAGINA;
+  const indicePrimero = indiceUltimo - ITEMS_POR_PAGINA;
+  const productosVisibles = productos.slice(indicePrimero, indiceUltimo);
+
+  const cambiarPagina = (numero) => {
+    if (numero >= 1 && numero <= totalPaginas) {
+      setPaginaActual(numero);
+    }
   };
 
-  const ejecutarEliminacion = () => {
-    setProductos(productos.filter(p => p.id !== productoAEliminar.id));
-    setShowDeleteModal(false);
-    setProductoAEliminar(null);
-  };
-
+  // --- MANEJADORES ---
   const handleGuardar = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -61,6 +73,7 @@ export default function ProductosNegocio() {
         emoji: emojiFinal
       };
       setProductos([...productos, nuevo]);
+      setPaginaActual(1);
     }
     cerrarModal();
   };
@@ -77,33 +90,36 @@ export default function ProductosNegocio() {
     setEmojiSeleccionado("🛍️");
   };
 
+  const ejecutarEliminacion = () => {
+    const nuevosProductos = productos.filter(p => p.id !== productoAEliminar.id);
+    setProductos(nuevosProductos);
+    if (nuevosProductos.slice(indicePrimero, indiceUltimo).length === 0 && paginaActual > 1) {
+      setPaginaActual(paginaActual - 1);
+    }
+    setShowDeleteModal(false);
+    setProductoAEliminar(null);
+  };
+
   return (
     <div className="productos-view" style={{ padding: "30px", backgroundColor: "#f4f7fa", minHeight: "100vh", fontFamily: "sans-serif" }}>
+      
       {/* HEADER */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "25px" }}>
         <h2 style={{ color: colores.primario, margin: 0, fontSize: "24px", fontWeight: "bold" }}>Productos</h2>
         <button 
           onClick={() => setShowModal(true)} 
           style={{ 
-            background: colores.azulBoton, 
-            color: "white", 
-            padding: "12px 20px", 
-            borderRadius: "10px", 
-            border: "none", 
-            cursor: "pointer", 
-            display: "flex", 
-            alignItems: "center", 
-            gap: "8px", 
-            fontWeight: "600",
-            fontSize: "14px"
+            background: colores.azulBoton, color: "white", padding: "12px 20px", borderRadius: "10px", 
+            border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", 
+            fontWeight: "600", fontSize: "14px"
           }}
         >
           <FaPlus size={12} /> Agregar producto
         </button>
       </div>
 
-      {/* TABLA ESTILO FLUXPAY */}
-      <div style={{ background: "white", borderRadius: "18px", boxShadow: "0 4px 20px rgba(0,0,0,0.03)", overflow: "hidden" }}>
+      {/* TABLA CON PAGINACIÓN */}
+      <div style={{ background: "white", borderRadius: "18px", boxShadow: "0 4px 20px rgba(0,0,0,0.03)", overflow: "hidden", padding: "10px" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ textAlign: "left", borderBottom: "1px solid #f1f5f9" }}>
@@ -114,18 +130,13 @@ export default function ProductosNegocio() {
             </tr>
           </thead>
           <tbody>
-            {productos.map((item) => (
+            {productosVisibles.map((item) => (
               <tr key={item.id} style={{ borderBottom: "1px solid #f8fafc" }}>
                 <td style={{ padding: "12px 20px", display: "flex", alignItems: "center", gap: "15px" }}>
                   <div style={{ 
-                    width: "42px", 
-                    height: "42px", 
-                    backgroundColor: colores.fondoCírculo, 
-                    borderRadius: "50%", 
-                    display: "flex", 
-                    alignItems: "center", 
-                    justifyContent: "center", 
-                    fontSize: "20px" 
+                    width: "42px", height: "42px", backgroundColor: colores.fondoCírculo, 
+                    borderRadius: "50%", display: "flex", alignItems: "center", 
+                    justifyContent: "center", fontSize: "20px" 
                   }}>
                     {item.emoji}
                   </div>
@@ -135,12 +146,41 @@ export default function ProductosNegocio() {
                 <td style={{ padding: "20px", color: colores.primario, fontWeight: "700" }}>{item.income}</td>
                 <td style={{ padding: "20px", textAlign: "right" }}>
                   <button onClick={() => prepararEdicion(item)} style={{ color: colores.secundario, background: "none", border: "none", cursor: "pointer", marginRight: "12px" }}><FaEdit size={16} /></button>
-                  <button onClick={() => confirmarEliminacion(item)} style={{ color: colores.eliminar, background: "none", border: "none", cursor: "pointer" }}><FaTrash size={16} /></button>
+                  <button onClick={() => { setProductoAEliminar(item); setShowDeleteModal(true); }} style={{ color: colores.eliminar, background: "none", border: "none", cursor: "pointer" }}><FaTrash size={16} /></button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+
+        {/* CONTROLES DE PAGINACIÓN */}
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "10px", marginTop: "25px", paddingBottom: "15px" }}>
+          <button 
+            onClick={() => cambiarPagina(paginaActual - 1)}
+            disabled={paginaActual === 1}
+            style={estiloBtnPaginacion(false, paginaActual === 1)}
+          >
+            <FaChevronLeft size={12} />
+          </button>
+
+          {[...Array(totalPaginas)].map((_, i) => (
+            <button
+              key={i + 1}
+              onClick={() => cambiarPagina(i + 1)}
+              style={estiloBtnPaginacion(paginaActual === i + 1)}
+            >
+              {i + 1}
+            </button>
+          ))}
+
+          <button 
+            onClick={() => cambiarPagina(paginaActual + 1)}
+            disabled={paginaActual === totalPaginas}
+            style={estiloBtnPaginacion(false, paginaActual === totalPaginas)}
+          >
+            <FaChevronRight size={12} />
+          </button>
+        </div>
       </div>
 
       {/* MODAL NUEVO / EDITAR */}
@@ -151,7 +191,7 @@ export default function ProductosNegocio() {
             <form onSubmit={handleGuardar} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
               <div>
                 <label style={{ fontSize: "13px", color: colores.textoGris, marginBottom: "5px", display: "block" }}>Nombre</label>
-                <input name="nombre" placeholder="Ej. Sabritas Adobadas" defaultValue={editandoId ? productos.find(p => p.id === editandoId).name : ""} required style={{ width: "93%", padding: "12px", borderRadius: "10px", border: "1px solid #e2e8f0" }} />
+                <input name="nombre" placeholder="Ej. Sabritas" defaultValue={editandoId ? productos.find(p => p.id === editandoId).name : ""} required style={{ width: "93%", padding: "12px", borderRadius: "10px", border: "1px solid #e2e8f0" }} />
               </div>
               <div style={{ display: "flex", gap: "10px" }}>
                 <div style={{ flex: 1 }}>
@@ -164,15 +204,11 @@ export default function ProductosNegocio() {
                 </div>
               </div>
               <div>
-                <label style={{ fontSize: "13px", color: colores.textoGris, marginBottom: "10px", display: "block" }}>Icono del producto</label>
+                <label style={{ fontSize: "13px", color: colores.textoGris, marginBottom: "10px", display: "block" }}>Icono</label>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "10px" }}>
                   {opcionesEmojis.map(emo => (
                     <span key={emo} onClick={() => setEmojiSeleccionado(emo)} style={{ fontSize: "20px", cursor: "pointer", padding: "8px", borderRadius: "8px", background: emojiSeleccionado === emo ? "#eef2f7" : "#f8fafc", border: emojiSeleccionado === emo ? `1px solid ${colores.azulBoton}` : "1px solid transparent" }}>{emo}</span>
                   ))}
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "#f8fafc", padding: "10px", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
-                  <FaSmile style={{ color: "#94a3b8" }} />
-                  <input name="emojiManual" placeholder="O pega tu propio emoji..." style={{ border: "none", background: "transparent", width: "100%", fontSize: "13px", outline: "none" }} onChange={(e) => e.target.value && setEmojiSeleccionado(e.target.value)} />
                 </div>
               </div>
               <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
@@ -184,16 +220,14 @@ export default function ProductosNegocio() {
         </div>
       )}
 
-      {/* MODAL DE ELIMINACIÓN */}
+      {/* MODAL ELIMINAR */}
       {showDeleteModal && (
         <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1100 }}>
           <div style={{ background: "white", padding: "40px", borderRadius: "24px", width: "350px", textAlign: "center", boxShadow: "0 20px 40px rgba(0,0,0,0.2)" }}>
-            <div style={{ color: colores.eliminar, fontSize: "50px", marginBottom: "20px" }}>
-              <FaExclamationTriangle />
-            </div>
+            <FaExclamationTriangle size={50} color={colores.eliminar} style={{ marginBottom: "20px" }} />
             <h3 style={{ color: colores.primario, margin: "0 0 10px 0" }}>¿Eliminar producto?</h3>
             <p style={{ color: colores.textoGris, fontSize: "14px", marginBottom: "30px" }}>
-              ¿Estás seguro de que quieres eliminar <b>{productoAEliminar?.name}</b>? Esta acción no se puede deshacer.
+              ¿Estás seguro de que quieres eliminar <b>{productoAEliminar?.name}</b>?
             </p>
             <div style={{ display: "flex", gap: "12px" }}>
               <button onClick={() => setShowDeleteModal(false)} style={{ flex: 1, padding: "12px", borderRadius: "12px", border: "1px solid #e2e8f0", background: "white", fontWeight: "600", cursor: "pointer" }}>Cancelar</button>
@@ -205,3 +239,20 @@ export default function ProductosNegocio() {
     </div>
   );
 }
+
+// Estilo de los botones de paginación
+const estiloBtnPaginacion = (activo, desactivado = false) => ({
+  width: "38px",
+  height: "38px",
+  borderRadius: "10px",
+  border: "1px solid #e2e8f0",
+  background: activo ? "#0e2a5a" : "white",
+  color: activo ? "white" : "#0e2a5a",
+  cursor: desactivado ? "not-allowed" : "pointer",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontWeight: "bold",
+  opacity: desactivado ? 0.5 : 1,
+  transition: "all 0.2s"
+});
