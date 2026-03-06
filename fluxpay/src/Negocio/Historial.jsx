@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { 
     FaSearch, FaTimes, FaCalendarAlt, 
-    FaDownload, FaCircle, FaFileExcel 
+    FaDownload, FaCircle, FaChevronLeft, FaChevronRight 
 } from "react-icons/fa";
 
 // Librerías para la descarga
@@ -25,6 +25,8 @@ export default function HistorialNegocio() {
         { id: 2, fecha: "2026-12-02", concepto: "Pago Recibido", monto: "$1121", hora: "12:00", estado: "En curso" },
         { id: 3, fecha: "2025-12-05", concepto: "Venta Tienda", monto: "$871", hora: "09:00", estado: "Pendiente" },
         { id: 4, fecha: "2026-01-02", concepto: "Dispositivo", monto: "$119", hora: "08:00", estado: "Completado" },
+        { id: 5, fecha: "2026-01-05", concepto: "Recarga", monto: "$200", hora: "14:00", estado: "Completado" },
+        { id: 6, fecha: "2026-01-06", concepto: "Suscripción", monto: "$500", hora: "10:30", estado: "En curso" },
     ];
 
     const [transacciones, setTransacciones] = useState(datosOriginales);
@@ -32,7 +34,10 @@ export default function HistorialNegocio() {
     const [fechaInicio, setFechaInicio] = useState("");
     const [fechaFin, setFechaFin] = useState("");
 
-    // Lógica de filtrado
+    // --- LÓGICA DE PAGINACIÓN ---
+    const [paginaActual, setPaginaActual] = useState(1);
+    const registrosPorPagina = 5;
+
     useEffect(() => {
         const filtrados = datosOriginales.filter((t) => {
             const fechaT = new Date(t.fecha);
@@ -44,7 +49,14 @@ export default function HistorialNegocio() {
             return coincideBusqueda && coincideFecha;
         });
         setTransacciones(filtrados);
+        setPaginaActual(1); // Reiniciar a página 1 al filtrar
     }, [busqueda, fechaInicio, fechaFin]);
+
+    // Cálculo de índices para paginación
+    const ultimoIndice = paginaActual * registrosPorPagina;
+    const primerIndice = ultimoIndice - registrosPorPagina;
+    const registrosPagina = transacciones.slice(primerIndice, ultimoIndice);
+    const totalPaginas = Math.ceil(transacciones.length / registrosPorPagina);
 
     const limpiarFiltros = () => {
         setBusqueda("");
@@ -52,9 +64,7 @@ export default function HistorialNegocio() {
         setFechaFin("");
     };
 
-    // Función para descargar Excel
     const exportarExcel = () => {
-        // Formateamos los datos para el Excel
         const datosExcel = transacciones.map(t => ({
             "FECHA": t.fecha,
             "CONCEPTO": t.concepto,
@@ -62,14 +72,9 @@ export default function HistorialNegocio() {
             "HORA": t.hora,
             "ESTADO": t.estado
         }));
-
         const worksheet = XLSX.utils.json_to_sheet(datosExcel);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Historial");
-
-        // Ajuste de ancho de columnas
-        worksheet['!cols'] = [{ wch: 15 }, { wch: 25 }, { wch: 12 }, { wch: 10 }, { wch: 15 }];
-
         const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
         const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
         saveAs(data, `FluxPay_Historial_${new Date().toISOString().split('T')[0]}.xlsx`);
@@ -87,10 +92,10 @@ export default function HistorialNegocio() {
             {/* HEADER */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px" }}>
                 <div>
-                    <h2 style={{ color: colores.primario, fontWeight: "800", fontSize: "32px", margin: 0, letterSpacing: "-0.5px" }}>
+                    <h2 style={{ color: colores.primario, fontWeight: "800", fontSize: "32px", margin: 0 }}>
                         Historial de Actividad
                     </h2>
-                    <p style={{ color: colores.textoGris, margin: "5px 0 0 0" }}>Gestiona y visualiza todos tus movimientos financieros</p>
+                    <p style={{ color: colores.textoGris, margin: "5px 0 0 0" }}>Gestiona tus movimientos financieros</p>
                 </div>
                 <button onClick={exportarExcel} style={estiloBtnExportar}>
                     <FaDownload /> Exportar Excel
@@ -98,7 +103,6 @@ export default function HistorialNegocio() {
             </div>
 
             <div style={estiloCardPrincipal}>
-                
                 {/* FILTROS */}
                 <div style={estiloBarraFiltros}>
                     <div style={estiloContenedorInput}>
@@ -143,8 +147,8 @@ export default function HistorialNegocio() {
                             </tr>
                         </thead>
                         <tbody>
-                            {transacciones.length > 0 ? (
-                                transacciones.map((t) => {
+                            {registrosPagina.length > 0 ? (
+                                registrosPagina.map((t) => {
                                     const styleStatus = getEstadoStyle(t.estado);
                                     return (
                                         <tr key={t.id} style={estiloTr}>
@@ -180,81 +184,80 @@ export default function HistorialNegocio() {
                         </tbody>
                     </table>
                 </div>
+
+                {/* BARRA DE PAGINACIÓN */}
+                {totalPaginas > 1 && (
+                    <div style={estiloPaginacion}>
+                        <p style={{ fontSize: "14px", color: colores.textoGris, margin: 0 }}>
+                            Mostrando <span style={{ fontWeight: "700", color: colores.primario }}>{primerIndice + 1}</span> a <span style={{ fontWeight: "700", color: colores.primario }}>{Math.min(ultimoIndice, transacciones.length)}</span> de {transacciones.length} registros
+                        </p>
+                        <div style={{ display: "flex", gap: "10px" }}>
+                            <button 
+                                onClick={() => setPaginaActual(p => Math.max(1, p - 1))}
+                                disabled={paginaActual === 1}
+                                style={estiloBtnPagina(paginaActual === 1)}
+                            >
+                                <FaChevronLeft fontSize="12px" />
+                            </button>
+                            
+                            {[...Array(totalPaginas)].map((_, i) => (
+                                <button
+                                    key={i + 1}
+                                    onClick={() => setPaginaActual(i + 1)}
+                                    style={paginaActual === i + 1 ? estiloBtnPaginaActivo : estiloBtnPagina(false)}
+                                >
+                                    {i + 1}
+                                </button>
+                            ))}
+
+                            <button 
+                                onClick={() => setPaginaActual(p => Math.min(totalPaginas, p + 1))}
+                                disabled={paginaActual === totalPaginas}
+                                style={estiloBtnPagina(paginaActual === totalPaginas)}
+                            >
+                                <FaChevronRight fontSize="12px" />
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
 }
 
-// --- ESTILOS EN LÍNEA (Objetos JS) ---
-const estiloCardPrincipal = {
-    background: "white",
-    borderRadius: "20px",
-    padding: "30px",
-    boxShadow: "0 10px 40px rgba(0,0,0,0.04)",
-    border: "1px solid #f1f5f9"
-};
-
-const estiloBarraFiltros = {
+// --- ESTILOS EXTRA ---
+const estiloPaginacion = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "25px",
-    gap: "20px",
-    flexWrap: "wrap"
+    marginTop: "25px",
+    paddingTop: "20px",
+    borderTop: "1px solid #f1f5f9"
 };
 
-const estiloContenedorInput = {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-    background: "#f1f5f9",
-    padding: "12px 20px",
-    borderRadius: "14px",
-    width: "350px"
+const estiloBtnPagina = (disabled) => ({
+    width: "36px", height: "36px", borderRadius: "10px", border: "1px solid #e2e8f0",
+    background: disabled ? "#f8fafc" : "white", color: disabled ? "#cbd5e1" : "#1e293b",
+    cursor: disabled ? "not-allowed" : "pointer", display: "flex", alignItems: "center",
+    justifyContent: "center", fontWeight: "600", transition: "all 0.2s"
+});
+
+const estiloBtnPaginaActivo = {
+    width: "36px", height: "36px", borderRadius: "10px", border: "none",
+    background: "#0e2a5a", color: "white", cursor: "pointer", display: "flex",
+    alignItems: "center", justifyContent: "center", fontWeight: "700"
 };
 
-const estiloContenedorFecha = {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    background: "white",
-    padding: "8px 15px",
-    borderRadius: "12px",
-    border: "1px solid #e2e8f0"
-};
-
-const estiloInputInner = { border: "none", background: "transparent", outline: "none", width: "100%", color: "#0e2a5a", fontSize: "14px", fontWeight: "500" };
-const estiloInputFecha = { border: "none", outline: "none", color: "#475569", fontSize: "13px", fontWeight: "500", cursor: "pointer" };
+const estiloCardPrincipal = { background: "white", borderRadius: "20px", padding: "30px", boxShadow: "0 10px 40px rgba(0,0,0,0.04)", border: "1px solid #f1f5f9" };
+const estiloBarraFiltros = { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "25px", gap: "20px", flexWrap: "wrap" };
+const estiloContenedorInput = { display: "flex", alignItems: "center", gap: "12px", background: "#f1f5f9", padding: "12px 20px", borderRadius: "14px", width: "350px" };
+const estiloContenedorFecha = { display: "flex", alignItems: "center", gap: "8px", background: "white", padding: "8px 15px", borderRadius: "12px", border: "1px solid #e2e8f0" };
+const estiloInputInner = { border: "none", background: "transparent", outline: "none", width: "100%", color: "#0e2a5a", fontSize: "14px" };
+const estiloInputFecha = { border: "none", outline: "none", color: "#475569", fontSize: "13px", cursor: "pointer" };
 const estiloTh = { padding: "12px 20px", color: "#94a3b8", fontSize: "11px", fontWeight: "700", textTransform: "uppercase" };
 const estiloTd = { padding: "16px 20px", fontSize: "14px", color: "#475569" };
 const estiloTr = { background: "#ffffff", borderBottom: "1px solid #f8fafc" };
-
-const estiloStatusBadge = (bg, color) => ({
-    background: bg,
-    color: color,
-    padding: "6px 14px",
-    borderRadius: "10px",
-    fontSize: "12px",
-    fontWeight: "700",
-    display: "inline-flex",
-    alignItems: "center",
-    minWidth: "100px",
-    justifyContent: "center"
-});
-
-const estiloIconoConcepto = {
-    width: "32px", height: "32px", background: "#eff6ff", color: "#3b82f6", 
-    borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center",
-    fontSize: "10px", fontWeight: "bold"
-};
-
-const estiloBtnExportar = {
-    background: "#0e2a5a", color: "white", border: "none", padding: "12px 24px",
-    borderRadius: "14px", fontWeight: "600", fontSize: "14px", cursor: "pointer",
-    display: "flex", alignItems: "center", gap: "10px"
-};
-
-const estiloBtnLimpiar = {
-    background: "none", color: "#ef4444", border: "1px solid #fee2e2", padding: "10px 18px",
-    borderRadius: "12px", cursor: "pointer", fontWeight: "600", fontSize: "13px", display: "flex", alignItems: "center", gap: "6px"
-};
+const estiloStatusBadge = (bg, color) => ({ background: bg, color, padding: "6px 14px", borderRadius: "10px", fontSize: "12px", fontWeight: "700", display: "inline-flex", alignItems: "center", minWidth: "100px", justifyContent: "center" });
+const estiloIconoConcepto = { width: "32px", height: "32px", background: "#eff6ff", color: "#3b82f6", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", fontWeight: "bold" };
+const estiloBtnExportar = { background: "#0e2a5a", color: "white", border: "none", padding: "12px 24px", borderRadius: "14px", fontWeight: "600", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "10px" };
+const estiloBtnLimpiar = { background: "none", color: "#ef4444", border: "1px solid #fee2e2", padding: "10px 18px", borderRadius: "12px", cursor: "pointer", fontWeight: "600", fontSize: "13px", display: "flex", alignItems: "center", gap: "6px" };

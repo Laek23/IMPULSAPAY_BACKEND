@@ -4,6 +4,8 @@ import {
     FaCrown, FaCheckCircle, FaLink, FaChevronDown, 
     FaCreditCard, FaPencilAlt, FaUniversity 
 } from 'react-icons/fa';
+// 1. Importamos SweetAlert2
+import Swal from 'sweetalert2';
 
 const Configuracion = () => {
     const [editMode, setEditMode] = useState(false);
@@ -26,7 +28,6 @@ const Configuracion = () => {
     const logos = {
         paypal: "https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg",
         stripe: "https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg",
-       
     };
 
     // 1. Manejar la previsualización (No guarda todavía)
@@ -48,17 +49,28 @@ const Configuracion = () => {
             setNegocio({ ...negocio, foto: tempFoto });
 
             // ACTUALIZAR EL LAYOUT (Header)
-            // Buscamos el avatar del header por su clase y cambiamos la fuente
             const headerAvatar = document.querySelector('.negocio-avatar-wrapper img');
             const headerName = document.querySelector('.negocio-user-name');
             
             if (headerAvatar) headerAvatar.src = tempFoto;
-            if (headerName) headerName.textContent = "José Aguilar"; // O el nombre que edites
+            if (headerName) headerName.textContent = "José Aguilar"; 
         }
         
-        setEditMode(false);
-        setTempFoto(null); // Limpiar temporal
-        alert("¡Cambios guardados con éxito!");
+        // 3. REEMPLAZO DEL ALERT POR SWEETALERT2
+        Swal.fire({
+            title: 'Cambios guardados',
+            text: 'La información del negocio se actualizó correctamente.',
+            icon: 'success',
+            confirmButtonText: 'Aceptar',
+            confirmButtonColor: '#11264c', // El azul de tu diseño
+            iconColor: '#a5dc86',
+            customClass: {
+                popup: 'swal2-border-radius'
+            }
+        }).then(() => {
+            setEditMode(false);
+            setTempFoto(null); // Limpiar temporal
+        });
     };
 
     return (
@@ -93,7 +105,6 @@ const Configuracion = () => {
 
                         <div className="edit-photo-section">
                             <div className="profile-photo-wrapper large">
-                                {/* Muestra tempFoto si existe, si no, la original */}
                                 <img src={tempFoto || negocio.foto} alt="Perfil" className="profile-img" />
                                 <div className="status-indicator online"></div>
                             </div>
@@ -182,7 +193,6 @@ const Configuracion = () => {
                             <div className="integrations-list">
                                 <img src={logos.paypal} alt="Paypal" className="logo-integration" />
                                 <img src={logos.stripe} alt="Stripe" className="logo-integration" />
-                                
                             </div>
                         </div>
                     </div>
