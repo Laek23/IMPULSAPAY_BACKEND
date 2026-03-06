@@ -1,6 +1,7 @@
 import "./ConfiguracionAdmi.css";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import Swal from "sweetalert2";
 import {
   FaHome,
   FaStore,
@@ -39,6 +40,18 @@ export default function ConfiguracionAdmi() {
   };
 
   const toggleEdit = (campo) => {
+
+    if (editMode[campo]) {
+
+      Swal.fire({
+        icon: "success",
+        title: "Datos actualizados",
+        text: "La información se guardó correctamente.",
+        confirmButtonColor: "#0d2b5c"
+      });
+
+    }
+
     setEditMode({
       ...editMode,
       [campo]: !editMode[campo]
@@ -46,16 +59,27 @@ export default function ConfiguracionAdmi() {
   };
 
   const handlePhoto = (e) => {
+
     const file = e.target.files[0];
 
     if (file) {
+
       const reader = new FileReader();
 
       reader.onload = () => {
+
         setAdminData({
           ...adminData,
           foto: reader.result
         });
+
+        Swal.fire({
+          icon: "success",
+          title: "Foto actualizada",
+          text: "La foto de perfil se cambió correctamente.",
+          confirmButtonColor: "#0d2b5c"
+        });
+
       };
 
       reader.readAsDataURL(file);
@@ -67,6 +91,7 @@ export default function ConfiguracionAdmi() {
 
       <aside className="admin-sidebar">
         <div>
+
           <div className="admin-logo-container">
             <img src="/fluxpay.jpg" alt="FluxPay Logo" className="admin-logo" />
           </div>
@@ -90,6 +115,7 @@ export default function ConfiguracionAdmi() {
             </li>
 
           </ul>
+
         </div>
 
         <div>
