@@ -1,185 +1,131 @@
-import React, { useState, useEffect } from 'react';
-import { FaSearch, FaQrcode, FaBackspace, FaTrashAlt, FaCheck, FaCreditCard } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { FaSearch, FaBarcode, FaPrint, FaPlus, FaMinus, FaTrash } from 'react-icons/fa';
 import Swal from 'sweetalert2';
-import { QRCodeSVG } from 'qrcode.react';
-import ReactDOM from 'react-dom/client';
 
 const Cobrar = () => {
-  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [monto, setMonto] = useState("0");
+  const barcodeInputRef = useRef(null);
 
   const productos = [
-    { id: 1, nombre: "Café Sobre 50g", precio: 15 },
-    { id: 2, nombre: "Galletas Gamesa 100g", precio: 25 },
-    { id: 3, nombre: "Refresco Sprite", precio: 22 },
-    { id: 4, nombre: "Yakult", precio: 10 },
-    { id: 5, nombre: "Picafresa", precio: 5 },
+    { id: 1, sku: "750105", nombre: "Café Sobre 50g", precio: 15 },
+    { id: 2, sku: "750212", nombre: "Galletas Gamesa 100g", precio: 25 },
+    { id: 3, sku: "750334", nombre: "Refresco Sprite", precio: 22 },
+    { id: 4, sku: "750445", nombre: "Yakult", precio: 10 },
+    { id: 5, sku: "750556", nombre: "Picafresa", precio: 5 },
   ];
 
-  useEffect(() => {
-    const totalSelected = selectedProducts.reduce((acc, prod) => acc + prod.precio, 0);
-    setMonto(totalSelected > 0 ? totalSelected.toString() : "0");
-  }, [selectedProducts]);
-
-  // --- 1. COBRO CON TARJETA (Simulación de Terminal Bancaria) ---
-  const handleTarjeta = () => {
-    const total = parseFloat(monto);
-    if (total === 0) {
-      Swal.fire({ icon: 'error', title: 'Monto en cero', text: 'No hay nada que cobrar.', confirmButtonColor: '#ef4444' });
-      return;
+  // Lógica de Escaneo: Si el usuario escribe rápido (o usa escáner), busca el producto
+  const handleBarcodeSearch = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    
+    const found = productos.find(p => p.sku === value);
+    if (found) {
+      addProduct(found);
+      setSearchTerm(""); // Limpia para el siguiente escaneo
     }
+  };
 
-    Swal.fire({
-      title: 'Procesando Tarjeta',
-      html: `
-        <div style="margin: 20px 0;">
-          <p>Monto a cobrar: <b>$${total}</b></p>
-          <div class="swal2-loading" style="display: flex; margin: 20px auto;"></div>
-          <p style="font-size: 0.9rem; color: #666;">Conectando con la terminal...</p>
-        </div>
-      `,
-      timer: 3000,
-      timerProgressBar: true,
-      showConfirmButton: false,
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
+  const addProduct = (prod) => {
+    setSelectedProducts(prev => {
+      const exists = prev.find(item => item.id === prod.id);
+      if (exists) {
+        return prev.map(item => item.id === prod.id 
+          ? { ...item, cant: item.cant + 1 } 
+          : item
+        );
       }
-    }).then((result) => {
-      if (result.dismiss === Swal.DismissReason.timer) {
-        Swal.fire({
-          icon: 'success',
-          title: '¡Pago Aprobado!',
-          html: `<p>Operación: <b>#${Math.floor(Math.random() * 888888 + 111111)}</b></p>`,
-          confirmButtonColor: '#112240',
-          confirmButtonText: 'Listo'
-        });
-        handleKeypress("C");
-      }
+      return [...prev, { ...prod, cant: 1 }];
     });
   };
 
-  // --- 2. COBRO CON QR (Generación inmediata) ---
-  const handleIrAQR = () => {
-    if (parseFloat(monto) === 0) {
-      Swal.fire({ icon: 'info', title: 'Atención', text: 'Ingresa un monto para generar el QR.', confirmButtonColor: '#3b82f6' });
-      return;
-    }
-
-    Swal.fire({
-      title: 'Pago con QR',
-      html: '<div id="qr-container" style="display:flex; flex-direction:column; align-items:center; padding:10px;"></div>',
-      didOpen: () => {
-        const container = document.getElementById('qr-container');
-        if (container) {
-          const root = ReactDOM.createRoot(container);
-          root.render(
-            <>
-              <QRCodeSVG value={`fluxpay_v2_trans:${Date.now()}_amt:${monto}`} size={200} level="H" includeMargin={true} />
-              <h2 style={{ marginTop: '15px', color: '#243f6b' }}>Total: $${monto}</h2>
-            </>
-          );
-        }
-      },
-      showConfirmButton: true,
-      confirmButtonText: 'Confirmar Recepción',
-      confirmButtonColor: '#112240',
-    }).then((result) => {
-      if (result.isConfirmed) handleKeypress("C");
-    });
+  const updateCant = (id, delta) => {
+    setSelectedProducts(prev => prev.map(item => 
+      item.id === id ? { ...item, cant: Math.max(1, item.cant + delta) } : item
+    ));
   };
 
-  // --- LÓGICA DE TECLADO ---
-  const handleKeypress = (val) => {
-    if (val === "C") {
-      setMonto("0");
-      setSelectedProducts([]);
-      return;
-    }
-    if (val === "del") {
-      setMonto(prev => prev.length > 1 ? prev.slice(0, -1) : "0");
-      return;
-    }
-    setMonto(prev => {
-      if (prev.length > 8) return prev;
-      if (prev === "0" && val !== ".") return val.toString();
-      if (val === "." && prev.includes(".")) return prev;
-      return prev + val.toString();
-    });
+  const removeProduct = (id) => {
+    setSelectedProducts(prev => prev.filter(item => item.id !== id));
   };
 
-  const toggleProduct = (prod) => {
-    if (selectedProducts.find(p => p.id === prod.id)) {
-      setSelectedProducts(selectedProducts.filter(p => p.id !== prod.id));
-    } else {
-      setSelectedProducts([...selectedProducts, prod]);
-    }
+  const subtotal = selectedProducts.reduce((acc, p) => acc + (p.precio * p.cant), 0);
+  const igv = subtotal * 0.18;
+  const total = subtotal + igv;
+
+  const handlePrint = () => {
+    window.print(); // Esto activará el diálogo de impresión del navegador
   };
 
   return (
-    <div className="pos-wrapper">
-      <h2 className="pos-title">Punto de Venta Digital</h2>
-      
-      <div className="pos-grid">
-        {/* Inventario */}
-        <div className="pos-card">
-          <h3 className="card-label">Inventario</h3>
-          <div className="pos-search">
-            <FaSearch />
+    <div className="pos-container">
+      <div className="pos-left">
+        <div className="search-section">
+          <label><FaBarcode /> Escanear o Buscar Producto</label>
+          <div className="pos-search-input">
             <input 
+              ref={barcodeInputRef}
               type="text" 
-              placeholder="Buscar producto..." 
-              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Código de barras o nombre..." 
+              value={searchTerm}
+              onChange={handleBarcodeSearch}
+              autoFocus
             />
-          </div>
-
-          <div className="pos-scroll-list">
-            {productos.filter(p => p.nombre.toLowerCase().includes(searchTerm.toLowerCase())).map((prod) => {
-              const active = selectedProducts.find(p => p.id === prod.id);
-              return (
-                <div key={prod.id} className={`pos-item ${active ? 'is-selected' : ''}`} onClick={() => toggleProduct(prod)}>
-                  <div className="pos-item-info">
-                    <div className="pos-checkbox">{active && <FaCheck />}</div>
-                    <span>{prod.nombre}</span>
-                  </div>
-                  <span className="pos-price">${prod.precio}</span>
-                </div>
-              );
-            })}
           </div>
         </div>
 
-        {/* Display y Métodos de Pago */}
-        <div className="pos-card">
-          <div className="pos-display">
-            <span span style={{fontSize: '13px', fontWeight: 'bold'}}>TOTAL A COBRAR</span>
-            <h2 className="pos-display-value">${monto}</h2>
-          </div>
+        <div className="product-grid">
+          {productos.filter(p => p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) || p.sku.includes(searchTerm)).map(p => (
+            <div key={p.id} className="product-card-item" onClick={() => addProduct(p)}>
+              <span className="sku-tag">{p.sku}</span>
+              <h4>{p.nombre}</h4>
+              <p className="price-tag">${p.precio.toFixed(2)}</p>
+            </div>
+          ))}
+        </div>
+      </div>
 
-          <div className="pos-keypad">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, ".", 0].map(n => (
-              <button key={n} className="key-btn" onClick={() => handleKeypress(n)}>{n}</button>
+      <div className="pos-right ticket-area" id="ticket-to-print">
+        <div className="ticket-header">
+          <h3>BODEGA CARMENCITA</h3>
+          <p>Fecha: {new Date().toLocaleDateString()} | {new Date().toLocaleTimeString()}</p>
+          <hr />
+        </div>
+
+        <div className="ticket-table">
+          <div className="t-head">
+            <span>Prod</span>
+            <span>Cant</span>
+            <span>Total</span>
+          </div>
+          <div className="t-body">
+            {selectedProducts.map(item => (
+              <div key={item.id} className="t-row">
+                <div className="t-info">
+                  <span className="t-name">{item.nombre}</span>
+                  <div className="qty-controls no-print">
+                    <button onClick={(e) => {e.stopPropagation(); updateCant(item.id, -1)}}><FaMinus/></button>
+                    <button onClick={(e) => {e.stopPropagation(); updateCant(item.id, 1)}}><FaPlus/></button>
+                    <button className="btn-del" onClick={(e) => {e.stopPropagation(); removeProduct(item.id)}}><FaTrash/></button>
+                  </div>
+                </div>
+                <span>x{item.cant}</span>
+                <span>${(item.precio * item.cant).toFixed(2)}</span>
+              </div>
             ))}
-            <button className="key-btn key-del" onClick={() => handleKeypress("del")}><FaBackspace /></button>
           </div>
+        </div>
 
-          <button className="key-clear" onClick={() => handleKeypress("C")}>
-            <FaTrashAlt /> Limpiar Cuenta
-          </button>
+        <div className="ticket-footer">
+          <div className="f-row"><span>Subtotal:</span> <span>${subtotal.toFixed(2)}</span></div>
+          <div className="f-row"><span>IGV (18%):</span> <span>${igv.toFixed(2)}</span></div>
+          <div className="f-row total"><span>TOTAL:</span> <span>${total.toFixed(2)}</span></div>
+        </div>
 
-          {/* Solo QR y Tarjeta */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginTop: '15px' }}>
-            <button className="btn-qr" onClick={handleIrAQR} style={{ backgroundColor: '#466699', color: 'white', padding: '15px', borderRadius: '12px', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-              <FaQrcode size={24} /> <span style={{fontSize: '13px', fontWeight: 'bold'}}>PAGO CON QR</span>
-            </button>
-            
-            <button className="btn-card" onClick={handleTarjeta} style={{ backgroundColor: '#364384', color: 'white', padding: '15px', borderRadius: '12px', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-              <FaCreditCard size={24} /> <span style={{fontSize: '13px', fontWeight: 'bold'}}>TARJETA</span>
-            </button>
-          </div>
+        <div className="action-buttons no-print">
+          <button className="btn-print" onClick={handlePrint}><FaPrint /> Imprimir Ticket</button>
+          <button className="btn-pay-qr">Pago QR / Tarjeta</button>
         </div>
       </div>
     </div>
