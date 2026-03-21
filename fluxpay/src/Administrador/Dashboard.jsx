@@ -1,6 +1,6 @@
 import "./DashboardAdmin.css";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 import Chart from "react-apexcharts";
 
 import {
@@ -9,7 +9,6 @@ import {
   FaChartBar,
   FaHeadset,
   FaSignOutAlt,
-  FaSearch,
   FaBell,
   FaDollarSign,
   FaShoppingCart,
@@ -19,7 +18,29 @@ import {
 
 export default function DashboardAdmin() {
 
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
+
+  // MESES DINÁMICOS
+  const fecha = new Date();
+
+  const meses = [
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+  ];
+
+  const mesActual = meses[fecha.getMonth()];
+  const mesAnterior = meses[fecha.getMonth() - 1 < 0 ? 11 : fecha.getMonth() - 1];
+
+  // FUNCIÓN BONUS
+  const getComparacion = (valor) => {
+    const esPositivo = valor >= 0;
+
+    return (
+      <span className={esPositivo ? "positive" : "negative"}>
+        {esPositivo ? "↑" : "↓"} {Math.abs(valor)}% respecto a {mesAnterior}
+      </span>
+    );
+  };
 
   const [chartData] = useState({
     series: [
@@ -43,54 +64,43 @@ export default function DashboardAdmin() {
   return (
     <div className="admin-layout">
 
+      {/* SIDEBAR */}
       <aside className="admin-sidebar">
+
         <div>
           <div className="admin-logo-container">
             <img src="/fluxpay.jpg" alt="FluxPay Logo" className="admin-logo" />
           </div>
 
           <ul className="sidebar-menu">
-            
+
             <li
               className="active"
               onClick={() => navigate("/admin/dashboard")}
-              style={{ cursor: "pointer" }}
             >
               <FaHome /> Dashboard
             </li>
 
-            <li
-              onClick={() => navigate("/admin/negocios")}
-              style={{ cursor: "pointer" }}
-            >
+            <li onClick={() => navigate("/admin/negocios")}>
               <FaStore /> Gestión Negocios
             </li>
 
-            <li
-              onClick={() => navigate("/admin/reportes")}
-              style={{ cursor: "pointer" }}
-            >
+            <li onClick={() => navigate("/admin/reportes")}>
               <FaChartBar /> Reportes globales
             </li>
 
-            <li
-              onClick={() => navigate("/admin/soporte")}
-              style={{ cursor: "pointer" }}
-            >
+            <li onClick={() => navigate("/admin/soporte")}>
               <FaHeadset /> Soporte
             </li>
 
           </ul>
         </div>
 
-        {/* PARTE INFERIOR DEL SIDEBAR */}
+        {/* PARTE INFERIOR */}
         <div>
 
           <ul className="sidebar-menu">
-            <li
-              onClick={() => navigate("/admin/configuracion")}
-              style={{ cursor: "pointer" }}
-            >
+            <li onClick={() => navigate("/admin/configuracion")}>
               <FaCog /> Configuración
             </li>
           </ul>
@@ -98,7 +108,6 @@ export default function DashboardAdmin() {
           <div
             className="logout"
             onClick={() => navigate("/")}
-            style={{ cursor: "pointer" }}
           >
             <FaSignOutAlt /> Cerrar sesión
           </div>
@@ -107,65 +116,72 @@ export default function DashboardAdmin() {
 
       </aside>
 
+      {/* MAIN */}
       <div className="admin-main">
 
-        <header className="header-wrapper">
+        {/* HEADER */}
+        <header className="header-wrapper modern-header">
+
           <div className="header-left">
-            <h1>Dashboard</h1>
-            <p>Hola, Alexander Castillo — Bienvenido de nuevo</p>
+            <h1>Dashboard de Administrador</h1>
+            <p>Bienvenido administrador</p>
           </div>
 
           <div className="header-right">
-            <div className="search-bar">
-              <FaSearch />
-              <input type="text" placeholder="Buscar..." />
-            </div>
 
-            <button className="notif-btn">
-              <FaBell />
-            </button>
-
-            <div className="profile-section">
-              <div className="profile-info">
-                <span className="p-name">Alexander Castillo</span>
-                <span className="p-role">Administrador</span>
+            <div className="user-info">
+              <div className="user-text">
+                <strong>Alexander Castillo</strong>
+                <span>castillobarbudoalexander@gmail.com</span>
               </div>
-              <img
-                src="https://i.pravatar.cc/150?u=alex"
-                alt="User"
-                className="p-avatar"
-              />
+
+              <div className="avatar-container">
+                <img
+                  src="https://i.pravatar.cc/150?u=alex"
+                  alt="User"
+                  className="p-avatar"
+                />
+                <span className="status-dot"></span>
+              </div>
             </div>
+
+            <div className="notification-icon">
+              <FaBell />
+            </div>
+
           </div>
         </header>
 
+        {/* CONTENIDO */}
         <main className="admin-dashboard">
 
           <div className="stats-grid">
+
             <div className="stat-card">
-              <h4>Ventas de hoy</h4>
-              <p>$12,350 <span className="positive">+8%</span></p>
+              <h4>Ventas del mes ({mesActual})</h4>
+              <p>$12,350 {getComparacion(8)}</p>
             </div>
 
             <div className="stat-card">
-              <h4>Transacciones</h4>
-              <p>56 <span className="positive">+12%</span></p>
+              <h4>Transacciones del mes ({mesActual})</h4>
+              <p>$56 {getComparacion(12)}</p>
             </div>
 
             <div className="stat-card">
-              <h4>Ingresos del mes</h4>
-              <p>$45,230 <span className="positive">+15%</span></p>
+              <h4>Ingresos del mes ({mesActual})</h4>
+              <p>$45,230 {getComparacion(15)}</p>
             </div>
 
             <div className="stat-card">
               <h4>Total acumulado</h4>
-              <p>$324,500</p>
+              <p>$324,500 {getComparacion(-5)}</p>
             </div>
+
           </div>
 
           <div className="middle-section">
             <div className="chart-box">
-              <h3>Estadísticas recientes</h3>
+              <h3>Ingresos Mensuales (visuales)</h3>
               <Chart
                 options={chartData.options}
                 series={chartData.series}
@@ -202,7 +218,7 @@ export default function DashboardAdmin() {
               <h3>Gestión de Negocios</h3>
               <div className="actions">
 
-                <button 
+                <button
                   className="btn-primary"
                   onClick={() => navigate("/admin/negocios")}
                 >
@@ -219,7 +235,7 @@ export default function DashboardAdmin() {
             <div className="action-card">
               <h3>Centro de soporte</h3>
               <div className="actions">
-                <button 
+                <button
                   className="btn-primary"
                   onClick={() => navigate("/admin/soporte")}
                 >
