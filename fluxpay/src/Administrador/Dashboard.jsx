@@ -44,8 +44,8 @@ export default function DashboardAdmin() {
 
   const [chartData] = useState({
     series: [
-      { name: "Ingresos", data: [1200, 2100, 1800, 2500, 2200, 3000, 2800] },
-      { name: "Transacciones", data: [30, 45, 38, 50, 42, 60, 55] },
+      { name: "Ingresos QR", data: [1200, 2100, 1800, 2500, 2200, 3000, 2800] },
+      { name: "Ingresos por tarjeta", data: [30, 45, 38, 50, 42, 60, 55] },
     ],
     options: {
       chart: { type: "area", toolbar: { show: false } },
