@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 import {FaHome,FaStore,FaChartBar,FaHeadset,FaSignOutAlt,FaSearch,FaBell,FaDollarSign,FaShoppingCart,FaUsers,FaHistory,FaCog, } from "react-icons/fa";
 import { CiCreditCard1 } from "react-icons/ci";
 import Axios from "axios";
-
+import CerrarSesion from "../CerrarSesion";
 
 // Imagen local
 import FotoPerfil from "./FotoPerfil.png";
@@ -91,10 +91,7 @@ function ClienteConfiguracion() {
 
     </ul>
   </div>
-
-  <div className="logout">
-    <FaSignOutAlt /> Cerrar sesión
-  </div>
+<CerrarSesion/>
 </aside>
       <div className="main-content flex-grow-1 p-4">
 <div className="container-fluid px-4 pt-4">

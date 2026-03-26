@@ -11,6 +11,7 @@ import { useEffect } from "react";
 import { FaHome,FaSignOutAlt,FaHistory,FaCog, } from "react-icons/fa";
 import { CiCreditCard1 } from "react-icons/ci";
 import { useNavigate } from "react-router-dom";
+import CerrarSesion from "../CerrarSesion";
 
 function ClienteTarjeta() {
   const navigate = useNavigate();
@@ -105,9 +106,8 @@ const borrarTarjeta = async (id) => {
     </ul>
   </div>
 
-  <div className="logout">
-    <FaSignOutAlt /> Cerrar sesión
-  </div>
+<CerrarSesion/>
+
 </aside>
 
       {/* Contenido principal */}

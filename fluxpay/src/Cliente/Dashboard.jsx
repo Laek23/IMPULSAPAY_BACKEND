@@ -60,9 +60,8 @@ export default function DashboardCliente() {
     </ul>
   </div>
 
-  <div className="logout">
-    <FaSignOutAlt /> Cerrar sesión
-  </div>
+<CerrarSesion/>
+
 </aside>
       
       {/* Contenido principal */}

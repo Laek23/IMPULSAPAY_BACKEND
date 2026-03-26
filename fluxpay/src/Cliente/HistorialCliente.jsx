@@ -70,9 +70,8 @@ const HistorialCliente = () => {
     </ul>
   </div>
 
-  <div className="logout">
-    <FaSignOutAlt /> Cerrar sesión
-  </div>
+<CerrarSesion/>
+
 </aside>
       {/* Contenido principal */}
     <div className="main-content">
