@@ -57,3 +57,19 @@ Route::put('/cliente/actualizar', [ClienteController::class, 'actualizar']);
 use App\Http\Controllers\SesionController;
 
 Route::post('/logout', [SesionController::class, 'logout'])->middleware('auth:sanctum');
+
+
+//crud de clientes en negocio
+
+// RUTAS PÚBLICAS (Para que el Admin pueda crear clientes sin errores de Token por ahora)
+Route::get('/clientes', [ClienteController::class, 'index']);
+Route::post('/clientes', [ClienteController::class, 'store']);
+Route::put('/clientes/{id}', [ClienteController::class, 'update']); // Cambiado a update
+Route::delete('/clientes/{id}', [ClienteController::class, 'destroy']);
+
+use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\MarcaController;
+
+// Esto habilita: GET, POST, PUT y DELETE automáticamente
+Route::apiResource('productos', ProductoController::class);
+Route::apiResource('marcas', MarcaController::class);
