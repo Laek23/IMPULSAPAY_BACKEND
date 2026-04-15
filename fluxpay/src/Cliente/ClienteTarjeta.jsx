@@ -145,7 +145,7 @@ const borrarTarjeta = async (id) => {
                   <Card className="shadow-sm h-100">
                     <Card.Body>
 <TarjetasCliente
-  number={tarjeta.last4}   // 👈 SOLO LOS 4
+  number={tarjeta.last4}   //  SOLO LOS 4
   brand={tarjeta.brand} 
   expiry={`${tarjeta.exp_month}/${String(tarjeta.exp_year).slice(-2)}`}
   name={tarjeta.name}

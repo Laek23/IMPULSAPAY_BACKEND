@@ -1,0 +1,201 @@
+/* ===== CONTENEDOR ===== */
+.plan-container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 60px 20px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  background: linear-gradient(135deg, #0f172a, #1e3a8a);
+  border-radius: 20px;
+  color: #fff;
+}
+
+/* ===== TITULOS ===== */
+.plan-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.plan-subtitle {
+  margin-bottom: 50px;
+  opacity: 0.7;
+  text-align: center;
+}
+
+/* ===== GRID ===== */
+.plan-cards {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+/* ===== TARJETAS ===== */
+.plan-card {
+  background: #020617;
+  border-radius: 20px;
+  padding: 30px;
+  position: relative;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.plan-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+}
+
+/* ===== BADGES ===== */
+.plan-badge {
+  position: absolute;
+  top: -10px;
+  left: 20px;
+  padding: 5px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  background: #ccc;
+  color: #000;
+}
+
+.popular-badge {
+  background: #00e0b8;
+}
+
+.premium-badge {
+  background: gold;
+}
+
+/* ===== TITULO ===== */
+.plan-card h2 {
+  margin-top: 20px;
+  font-size: 22px;
+}
+
+/* ===== LISTA ===== */
+.plan-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+}
+
+.plan-card ul li {
+  margin-bottom: 10px;
+  opacity: 0.85;
+}
+
+/* ===== PRECIO ===== */
+.plan-price {
+  font-size: 28px;
+  font-weight: bold;
+  margin: 20px 0;
+}
+
+.plan-price span {
+  font-size: 14px;
+  opacity: 0.6;
+}
+
+/* ===== BOTON ===== */
+.plan-btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: #2563eb;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.plan-btn:hover {
+  background: #1d4ed8;
+}
+
+/* ===== DESTACADOS ===== */
+.popular {
+  border: 2px solid #00e0b8;
+  transform: scale(1.05);
+}
+
+.premium {
+  border: 2px solid gold;
+}
+
+/* ===== RESPONSIVE ===== */
+
+/* Tablet */
+@media (max-width: 992px) {
+  .plan-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .popular {
+    transform: none;
+  }
+}
+
+/* Móvil */
+@media (max-width: 600px) {
+  .plan-container {
+    padding: 40px 15px;
+  }
+
+  .plan-title {
+    font-size: 2rem;
+  }
+
+  .plan-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .plan-card {
+    padding: 25px;
+  }
+}
+
+/* ===== PAGINA GENERAL ===== */
+.plan-page {
+  min-height: 100vh;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ===== LOGO INTEGRADO PROFESIONAL ===== */
+.plan-logo-wrapper {
+  margin-top: 50px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* Crea un aura sutil detrás de la imagen */
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+  padding: 20px;
+  border-radius: 50%;
+}
+
+.plan-logo-premium {
+  width: 220px; /* Un poco más grande para que destaque */
+  height: auto;
+  object-fit: contain;
+  
+  /* ESTO ES LA CLAVE: Elimina restos de fondos grises y suaviza bordes */
+  filter: brightness(1.1) contrast(1.1) drop-shadow(0 0 15px rgba(37, 99, 235, 0.4));
+  
+  /* Hace que la imagen se integre con el fondo oscuro si el logo tiene fondo negro/gris */
+  mix-blend-mode: screen; 
+  
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.plan-logo-premium:hover {
+  transform: scale(1.05);
+  filter: brightness(1.2) drop-shadow(0 0 25px rgba(37, 99, 235, 0.6));
+}
