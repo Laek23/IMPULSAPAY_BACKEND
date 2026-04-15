@@ -16,17 +16,25 @@ const Reportes = () => {
   useEffect(() => { fetchTickets(); }, []);
 
   const fetchTickets = async () => {
-    try {
-      const response = await fetch('http://localhost:8000/api/tickets');
-      if (!response.ok) throw new Error("Error en servidor");
-      const data = await response.json();
-      setTickets(data);
-    } catch (error) {
-      console.error("Error FluxPay:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const response = await fetch('http://localhost:8000/api/tickets', {
+      headers: {
+        "Accept": "application/json",
+        "Authorization": "Bearer " + localStorage.getItem("token") // 🔥 IMPORTANTE
+      }
+    });
+
+    if (!response.ok) throw new Error("Error en servidor");
+
+    const data = await response.json();
+    setTickets(data);
+
+  } catch (error) {
+    console.error("Error FluxPay:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,11 +50,14 @@ const Reportes = () => {
     };
 
     try {
-      const response = await fetch('http://localhost:8000/api/tickets', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(datosEnvio)
-      });
+    const response = await fetch('http://localhost:8000/api/tickets', {
+  method: 'POST',
+  headers: { 
+    'Content-Type': 'application/json',
+    "Authorization": "Bearer " + localStorage.getItem("token") // 🔥 CLAVE
+  },
+  body: JSON.stringify(datosEnvio)
+});
 
       if (response.ok) {
         e.target.reset();

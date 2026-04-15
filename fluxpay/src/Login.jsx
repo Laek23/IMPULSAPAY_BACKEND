@@ -25,17 +25,17 @@ export default function Login() {
 
       const data = await res.json();
 
-      console.log("Respuesta login:", data); // 🔥 DEBUG
+      console.log("Respuesta login:", data); 
 
       if (res.ok) {
-        // 🔐 guardar datos
+        
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify({
   ...data.user,
-  idrol: data.rol // 🔥 aseguramos el rol
+  idrol: data.rol 
 }));
 
-        // 🔥 REDIRECCIÓN POR ROL (AJUSTADO A TU BD)
+       
         switch (data.rol) {
 
           case 1:

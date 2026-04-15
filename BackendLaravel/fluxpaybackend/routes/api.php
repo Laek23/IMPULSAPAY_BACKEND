@@ -2,88 +2,112 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
+
+// Controllers
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\NegocioController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\TicketController;
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-// 🔥 TEST
+use App\Http\Controllers\TarjetaClienteController;
+use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\SesionController;
+use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\MarcaController;
+use App\Http\Controllers\Api\TiendaClienteDashController;
+
+/*
+|--------------------------------------------------------------------------
+| TEST
+|--------------------------------------------------------------------------
+*/
 Route::get('/test', function () {
     return response()->json(['mensaje' => 'API funcionando']);
 });
 
-// 🔓 PÚBLICAS
+/*
+|--------------------------------------------------------------------------
+| AUTENTICACIÓN (PÚBLICAS)
+|--------------------------------------------------------------------------
+*/
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+use App\Http\Controllers\Api\DashboardController;
 
-// 🔒 PROTEGIDAS
+// MUEVELA AQUÍ (Fuera de cualquier Route::group o middleware)
+Route::get('/dashboard', [DashboardController::class, 'index']);
+/*
+|--------------------------------------------------------------------------
+| RUTAS PROTEGIDAS (SANCTUM)
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth:sanctum')->group(function () {
 
-    // 👤 usuario autenticado
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
 
-    // 🔥 ADMIN (YA NO POR EMAIL)
     Route::get('/admin', [AdminController::class, 'show']);
     Route::put('/admin', [AdminController::class, 'update']);
 
-    // 🔐 negocios
+
     Route::apiResource('negocios', NegocioController::class);
 
-    // 🚪 logout
-    Route::post('/logout', [AuthController::class, 'logout']);
-});
-
-// 🔥 SOLO ADMIN
-Route::middleware(['auth:sanctum', 'rol:1'])->group(function () {
-    Route::get('/admin-negocios', [NegocioController::class, 'index']);
-});
-Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('negocios', NegocioController::class);
+   
+   Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('tickets', TicketController::class);
 });
 
-use App\Http\Controllers\TarjetaClienteController;
+    Route::post('/logout', [AuthController::class, 'logout']);
+});
 
+/*
+|--------------------------------------------------------------------------
+| SOLO ADMIN
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth:sanctum', 'rol:1'])->group(function () {
+    Route::get('/admin-negocios', [NegocioController::class, 'index']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| TARJETAS
+|--------------------------------------------------------------------------
+*/
 Route::get('/tarjetas', [TarjetaClienteController::class, 'listado']);
 Route::post('/tarjetas', [TarjetaClienteController::class, 'guardar']);
 Route::delete('/tarjetas/{id}', [TarjetaClienteController::class, 'eliminar']);
 
-use App\Http\Controllers\ClienteController;
-
+/*
+|--------------------------------------------------------------------------
+| CLIENTES
+|--------------------------------------------------------------------------
+*/
 Route::get('/historial', [ClienteController::class, 'historialCliente']);
 Route::get('/cliente/configuracion', [ClienteController::class, 'configuracion']);
 Route::put('/cliente/actualizar', [ClienteController::class, 'actualizar']);
 
-use App\Http\Controllers\SesionController;
-
-Route::post('/logout', [SesionController::class, 'logout'])->middleware('auth:sanctum');
-
-
-//crud de clientes en negocio
-
-// RUTAS PÚBLICAS (Para que el Admin pueda crear clientes sin errores de Token por ahora)
+// CRUD clientes (temporal público)
 Route::get('/clientes', [ClienteController::class, 'index']);
 Route::post('/clientes', [ClienteController::class, 'store']);
-Route::put('/clientes/{id}', [ClienteController::class, 'update']); // Cambiado a update
+Route::put('/clientes/{id}', [ClienteController::class, 'update']);
 Route::delete('/clientes/{id}', [ClienteController::class, 'destroy']);
 
-use App\Http\Controllers\ProductoController;
-use App\Http\Controllers\MarcaController;
-
-// Esto habilita: GET, POST, PUT y DELETE automáticamente
+/*
+|--------------------------------------------------------------------------
+| PRODUCTOS Y MARCAS
+|--------------------------------------------------------------------------
+*/
 Route::apiResource('productos', ProductoController::class);
 Route::apiResource('marcas', MarcaController::class);
 
-//rutas para el dashboard de cliente tienda
+/*
+|--------------------------------------------------------------------------
+| DASHBOARD TIENDA
+|--------------------------------------------------------------------------
+*/
 
-
-
-use App\Http\Controllers\Api\TiendaClienteDashController;
-
+//dash cliente tienda 
 // ¡ESTO ES VITAL! El middleware auth:sanctum debe envolver las rutas
 Route::middleware('auth:sanctum')->group(function () {
     

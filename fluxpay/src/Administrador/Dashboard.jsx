@@ -1,260 +1,188 @@
 import "./DashboardAdmin.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Chart from "react-apexcharts";
 
 import {
-  FaHome,
-  FaStore,
-  FaChartBar,
-  FaHeadset,
-  FaSignOutAlt,
-  FaBell,
-  FaDollarSign,
-  FaShoppingCart,
-  FaUsers,
-  FaCog
+  FaHome, FaStore, FaChartBar, FaHeadset, FaBell, FaDollarSign,
+  FaShoppingCart, FaUsers, FaCog
 } from "react-icons/fa";
 import CerrarSesion from "../CerrarSesion";
 
 export default function DashboardAdmin() {
-
   const navigate = useNavigate();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // MESES DINÁMICOS
-  const fecha = new Date();
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
 
-  const meses = [
-    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-  ];
+  const fetchDashboard = async () => {
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/dashboard", {
+        headers: {
+          "Authorization": "Bearer " + localStorage.getItem("token"),
+          "Accept": "application/json"
+        }
+      });
+      if (!res.ok) throw new Error("Error en la respuesta");
+      const json = await res.json();
+      setData(json);
+    } catch (err) {
+      console.error("Error al obtener datos:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const mesActual = meses[fecha.getMonth()];
-  const mesAnterior = meses[fecha.getMonth() - 1 < 0 ? 11 : fecha.getMonth() - 1];
+  const formatMoney = (value) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency', currency: 'USD', minimumFractionDigits: 2
+    }).format(value || 0);
+  };
 
-  // FUNCIÓN BONUS
   const getComparacion = (valor) => {
     const esPositivo = valor >= 0;
-
     return (
       <span className={esPositivo ? "positive" : "negative"}>
-        {esPositivo ? "↑" : "↓"} {Math.abs(valor)}% respecto a {mesAnterior}
+        {esPositivo ? "↑" : "↓"} {Math.abs(valor)}% respecto al mes anterior
       </span>
     );
   };
 
-  const [chartData] = useState({
-    series: [
-      { name: "Ingresos QR", data: [1200, 2100, 1800, 2500, 2200, 3000, 2800] },
-      { name: "Ingresos por tarjeta", data: [30, 45, 38, 50, 42, 60, 55] },
-    ],
+  const chartData = {
+    series: [{ name: "Ingresos", data: data?.grafica?.map(i => parseFloat(i.total).toFixed(2)) || [] }],
     options: {
-      chart: { type: "area", toolbar: { show: false } },
+      chart: { type: "area", toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
       dataLabels: { enabled: false },
       stroke: { curve: "smooth", width: 3 },
-      colors: ["#0d2b5c", "#31b0bd"],
-      fill: {
-        type: "gradient",
-        gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.1 },
+      colors: ["#0d2b5c"],
+      fill: { type: "gradient", gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.05 } },
+      xaxis: {
+        categories: data?.grafica?.map(i => {
+            const d = new Date(i.fecha + "T00:00:00");
+            return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
+        }) || [],
+        labels: { style: { fontSize: '11px', colors: '#7a8ca5' }, hideOverlappingLabels: true },
+        axisBorder: { show: false }
       },
-      xaxis: { categories: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"] },
-      legend: { position: "top" },
+      yaxis: { labels: { formatter: (val) => `$${Intl.NumberFormat('en-US').format(val)}`, style: { colors: '#7a8ca5' } } },
+      tooltip: { y: { formatter: (val) => formatMoney(val) } }
     },
-  });
+  };
+
+  if (loading) {
+    return (
+      <div className="admin-layout loader-container">
+        <h2 style={{color: '#0d2b5c'}}>Cargando Dashboard...</h2>
+      </div>
+    );
+  }
 
   return (
     <div className="admin-layout">
-
-      {/* SIDEBAR */}
       <aside className="admin-sidebar">
-
         <div>
           <div className="admin-logo-container">
             <img src="/fluxpay.jpg" alt="FluxPay Logo" className="admin-logo" />
           </div>
-
           <ul className="sidebar-menu">
-
-            <li
-              className="active"
-              onClick={() => navigate("/admin/dashboard")}
-            >
-              <FaHome /> Dashboard
-            </li>
-
-            <li onClick={() => navigate("/admin/negocios")}>
-              <FaStore /> Gestión Negocios
-            </li>
-
-            <li onClick={() => navigate("/admin/reportes")}>
-              <FaChartBar /> Reportes globales
-            </li>
-
-            <li onClick={() => navigate("/admin/soporte")}>
-              <FaHeadset /> Soporte
-            </li>
-
+            <li className="active" onClick={() => navigate("/admin/dashboard")}><FaHome /> Dashboard</li>
+            <li onClick={() => navigate("/admin/negocios")}><FaStore /> Gestión Negocios</li>
+            <li onClick={() => navigate("/admin/reportes")}><FaChartBar /> Reportes globales</li>
+            <li onClick={() => navigate("/admin/soporte")}><FaHeadset /> Soporte</li>
           </ul>
         </div>
-
-        {/* PARTE INFERIOR */}
         <div>
-
           <ul className="sidebar-menu">
-            <li onClick={() => navigate("/admin/configuracion")}>
-              <FaCog /> Configuración
-            </li>
+            <li onClick={() => navigate("/admin/configuracion")}><FaCog /> Configuración</li>
           </ul>
-
-          <div>   <CerrarSesion/>
-          </div>
-
+          <CerrarSesion />
         </div>
-
       </aside>
 
-      {/* MAIN */}
       <div className="admin-main">
-
-        {/* HEADER */}
-        <header className="header-wrapper modern-header">
-
+        {/* HEADER CON DISEÑO EXACTO DE LA IMAGEN */}
+        <header className="modern-header">
           <div className="header-left">
             <h1>Dashboard de Administrador</h1>
-            <p>Bienvenido administrador</p>
+            <p>Bienvenido de nuevo, {data?.usuario_nombre?.split(' ')[0] || "Administrador"}</p>
           </div>
-
           <div className="header-right">
-
-            <div className="user-info">
-              <div className="user-text">
-                <strong>Alexander Castillo</strong>
-                <span>castillobarbudoalexander@gmail.com</span>
-              </div>
-
-              <div className="avatar-container">
-                <img
-                  src="https://i.pravatar.cc/150?u=alex"
-                  alt="User"
-                  className="p-avatar"
-                />
-                <span className="status-dot"></span>
-              </div>
+            <div className="user-info-text">
+              <span className="user-name-header">{data?.usuario_nombre || "Usuario"}</span>
+              <span className="user-email-header">{data?.usuario_email || "admin@fluxpay.com"}</span>
             </div>
-
-            <div className="notification-icon">
-              <FaBell />
+            <div className="avatar-container">
+              <img src="https://i.pravatar.cc/150?u=admin" alt="Avatar" className="p-avatar-img" />
+              <span className="online-indicator"></span>
             </div>
-
+            <FaBell className="bell-icon" title="Notificaciones" />
           </div>
         </header>
 
-        {/* CONTENIDO */}
         <main className="admin-dashboard">
-
           <div className="stats-grid">
-
             <div className="stat-card">
-              <h4>Ventas del mes ({mesActual})</h4>
-              <p>$12,350 {getComparacion(8)}</p>
+              <h4>Ventas de {data?.mesNombre}</h4>
+              <p>{data?.transaccionesMes || 0} {getComparacion(data?.crecimiento)}</p>
             </div>
-
             <div className="stat-card">
-              <h4>Transacciones del mes ({mesActual})</h4>
-              <p>$56 {getComparacion(12)}</p>
+              <h4>Transacciones totales</h4>
+              <p>{data?.transacciones || 0}</p>
             </div>
-
             <div className="stat-card">
-              <h4>Ingresos del mes ({mesActual})</h4>
-              <p>$45,230 {getComparacion(15)}</p>
+              <h4>Ingresos de {data?.mesNombre}</h4>
+              <p>{formatMoney(data?.ingresosMes)} {getComparacion(data?.crecimiento)}</p>
             </div>
-
             <div className="stat-card">
               <h4>Total acumulado</h4>
-              <p>$324,500 {getComparacion(-5)}</p>
+              <p>{formatMoney(data?.ingresosTotales)}</p>
             </div>
-
           </div>
 
           <div className="middle-section">
             <div className="chart-box">
-              <h3>Ingresos Mensuales (visuales)</h3>
-              <Chart
-                options={chartData.options}
-                series={chartData.series}
-                type="area"
-                height={250}
-              />
+              <h3>Ingresos de los últimos días con actividad</h3>
+              <Chart options={chartData.options} series={chartData.series} type="area" height={280} />
             </div>
 
             <div className="recent-business">
               <h3>Negocios recientes</h3>
               <ul>
-                <li>
-                  <strong>Café el roble</strong>
-                  <span>12 ventas • $3,200</span>
-                </li>
-                <li>
-                  <strong>Moda Express</strong>
-                  <span>8 ventas • $2,150</span>
-                </li>
-                <li>
-                  <strong>Tienda Luna</strong>
-                  <span>5 ventas • $1,100</span>
-                </li>
-                <li>
-                  <strong>Tech Solutions</strong>
-                  <span>15 ventas • $4,500</span>
-                </li>
+                {data?.negociosRecientes?.map((n) => (
+                  <li key={n.id} className="business-item-row">
+                    <div className="b-info"><strong>{n.nombre}</strong></div>
+                    <span className="b-date">{new Date(n.created_at).toLocaleDateString()}</span>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
 
           <div className="bottom-section">
-            <div className="action-card">
+            <div className="action-card centered-card">
               <h3>Gestión de Negocios</h3>
               <div className="actions">
-
-                <button
-                  className="btn-primary"
-                  onClick={() => navigate("/admin/negocios")}
-                >
-                  Ver negocios
-                </button>
-
-                <button className="btn-dark">
-                  Agregar negocio
-                </button>
-
+                <button className="btn-primary" onClick={() => navigate("/admin/negocios")}>Ver negocios</button>
+                <button className="btn-dark">Agregar negocio</button>
               </div>
             </div>
-
-            <div className="action-card">
+            <div className="action-card centered-card">
               <h3>Centro de soporte</h3>
               <div className="actions">
-                <button
-                  className="btn-primary"
-                  onClick={() => navigate("/admin/soporte")}
-                >
-                  Ver consultas
-                </button>
+                <button className="btn-primary" onClick={() => navigate("/admin/soporte")}>Ver consultas</button>
                 <button className="btn-dark">Nuevo ticket</button>
               </div>
             </div>
           </div>
 
           <div className="reports">
-            <div className="report-item">
-              <FaUsers /> 245 Negocios registrados
-            </div>
-            <div className="report-item">
-              <FaShoppingCart /> 8,450 Transacciones totales
-            </div>
-            <div className="report-item">
-              <FaDollarSign /> $324,500 Ingresos totales
-            </div>
+            <div className="report-item"><FaUsers /> {data?.negocios || 0} Negocios registrados</div>
+            <div className="report-item"><FaShoppingCart /> {data?.transacciones || 0} Transacciones totales</div>
+            <div className="report-item"><FaDollarSign /> {formatMoney(data?.ingresosTotales)} Ingresos totales</div>
           </div>
-
         </main>
       </div>
     </div>

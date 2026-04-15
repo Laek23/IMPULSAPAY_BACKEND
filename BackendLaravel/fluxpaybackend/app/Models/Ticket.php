@@ -6,23 +6,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class Ticket extends Model
 {
-
+    protected $table = 'tickets';
 
     protected $fillable = [
-    'cliente',
-    'mensaje',
-    'estado',
-    'prioridad',
-    'negocio_id'
-];
+        'cliente',
+        'mensaje',
+        'estado',
+        'prioridad',
+        'negocio_id'
+    ];
 
-public function negocio()
-{
-    return $this->belongsTo(Negocio::class, 'negocio_id');
+    public function negocio()
+    {
+        return $this->belongsTo(Negocio::class, 'negocio_id');
+    }
 }
-public function tickets()
-{
-    return $this->hasMany(\App\Models\Ticket::class, 'negocio_id');
-}
-}
-
