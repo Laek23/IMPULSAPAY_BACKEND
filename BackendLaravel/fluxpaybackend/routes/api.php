@@ -77,3 +77,22 @@ use App\Http\Controllers\MarcaController;
 // Esto habilita: GET, POST, PUT y DELETE automáticamente
 Route::apiResource('productos', ProductoController::class);
 Route::apiResource('marcas', MarcaController::class);
+
+//rutas para el dashboard de cliente tienda
+
+
+
+use App\Http\Controllers\Api\TiendaClienteDashController;
+
+// Rutas protegidas por Sanctum
+Route::prefix('tienda/dashboard')->group(function () {
+    Route::get('productos', [TiendaClienteDashController::class, 'productos']);
+    Route::get('ingresos', [TiendaClienteDashController::class, 'ingresos']);
+    Route::get('resumen', [TiendaClienteDashController::class, 'resumen']);
+});
+
+
+use App\Http\Controllers\Api\GenerarTicketController;
+
+Route::get('/tickets', [GenerarTicketController::class, 'index']);
+Route::post('/tickets', [GenerarTicketController::class, 'store']);

@@ -1,15 +1,55 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   FaChartLine, FaCookie, FaCandyCane, FaWineBottle, 
   FaAppleAlt, FaFileDownload 
 } from "react-icons/fa";
 import * as XLSX from "xlsx";
+import axios from "axios";
 
 export default function DashboardNegocio() {
   const [mesSeleccionado, setMesSeleccionado] = useState("Todos");
   const [activeTooltip, setActiveTooltip] = useState(null);
 
-  // Mapeo de iconos con colores azul oscuro profundo
+  // 🔥 ESTADOS INICIALIZADOS CORRECTAMENTE
+  const [productos, setProductos] = useState([]);
+  const [ingresos, setIngresos] = useState([]);
+  const [resumen, setResumen] = useState({
+    total: 0,
+    efectivo: 0,
+    qr: 0
+  });
+
+  // 🔌 CONEXIÓN A LARAVEL
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const config = { headers: { Authorization: `Bearer ${token}` } };
+
+    // Petición de Productos
+    axios.get("http://127.0.0.1:8000/api/tienda/dashboard/productos", config)
+      .then(res => setProductos(Array.isArray(res.data) ? res.data : []))
+      .catch(err => console.error("Error productos:", err));
+
+    // Petición de Ingresos (para la gráfica)
+    axios.get("http://127.0.0.1:8000/api/tienda/dashboard/ingresos", config)
+      .then(res => setIngresos(Array.isArray(res.data) ? res.data : []))
+      .catch(err => console.error("Error ingresos:", err));
+
+    // Petición de Resumen (para las cards superiores)
+    axios.get("http://127.0.0.1:8000/api/tienda/dashboard/resumen", config)
+      .then(res => setResumen(res.data))
+      .catch(err => console.error("Error resumen:", err));
+
+  }, []);
+
+  // 🔥 LÓGICA DE FILTRADO Y CÁLCULO
+  const datosFiltrados = productos;
+
+  // Corregido: Buscamos por 'metodo_pago' y extraemos 'total' según tu controlador de Laravel
+  const efectivo = parseFloat(ingresos.find(i => i.metodo_pago === "efectivo")?.total || 0);
+  const qr = parseFloat(ingresos.find(i => i.metodo_pago === "qr")?.total || 0);
+  const totalGrafica = efectivo + qr || 1; // Evita división por cero
+
+  // ICONOS
   const getIcon = (name) => {
     const iconStyle = { fontSize: "1.2rem", marginRight: "10px", display: "flex", alignItems: "center" };
     switch (name) {
@@ -21,24 +61,13 @@ export default function DashboardNegocio() {
     }
   };
 
-  const inventoryData = [
-    { id: 1, name: "Galletas", units: 10, income: "$1912", mes: "Enero" },
-    { id: 2, name: "Sabritas", units: 12, income: "$1121", mes: "Enero" },
-    { id: 3, name: "Refrescos", units: 6, income: "$871", mes: "Febrero" },
-    { id: 4, name: "Golosinas", units: 33, income: "$119", mes: "Marzo" },
-  ];
-
-  const datosFiltrados = mesSeleccionado === "Todos" 
-    ? inventoryData 
-    : inventoryData.filter(item => item.mes === mesSeleccionado);
-
   const exportToExcel = () => {
-    const worksheet1 = XLSX.utils.json_to_sheet([{ Concepto: "Reporte", Valor: "Ingresos" }]);
+    const worksheet1 = XLSX.utils.json_to_sheet([{ Concepto: "Total", Valor: resumen.total }, { Concepto: "Efectivo", Valor: resumen.efectivo }, { Concepto: "QR", Valor: resumen.qr }]);
     const worksheet2 = XLSX.utils.json_to_sheet(datosFiltrados);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet1, "Resumen");
-    XLSX.utils.book_append_sheet(workbook, worksheet2, "Inventario");
-    XLSX.writeFile(workbook, `Reporte_Oscuro_${mesSeleccionado}.xlsx`);
+    XLSX.utils.book_append_sheet(workbook, worksheet1, "Resumen_Financiero");
+    XLSX.utils.book_append_sheet(workbook, worksheet2, "Inventario_Detalle");
+    XLSX.writeFile(workbook, `Reporte_FluxPay_${mesSeleccionado}.xlsx`);
   };
 
   return (
@@ -46,7 +75,7 @@ export default function DashboardNegocio() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px" }}>
         <div>
           <h2 className="admin-title" style={{ color: "#0f172a", fontWeight: "800" }}>Dashboard</h2>
-          <p className="welcome-text" style={{ color: "#334155" }}>Bienvenido Negocio</p>
+          <p className="welcome-text" style={{ color: "#334155" }}>Bienvenido a FluxPay</p>
         </div>
 
         <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
@@ -68,84 +97,88 @@ export default function DashboardNegocio() {
         </div>
       </div>
 
-      {/* STATS CARDS - AZULES OSCUROS */}
-      <div className="stats-grid">
-        <div className="stat-card glass-card" style={{ borderLeft: "5px solid #0f172a" }}>
-          <div className="card-header"><h4>Ingresos efectivo</h4><FaChartLine style={{color: "#0f172a"}} /></div>
-          <p className="amount" style={{ color: "#0f172a" }}>$50000.000</p>
+      {/* CARDS SUPERIORES */}
+      <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "20px", marginBottom: "30px" }}>
+        <div className="stat-card glass-card" style={{ padding: "20px", background: "white", borderRadius: "15px", borderLeft: "5px solid #0f172a", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between" }}><h4>Ingresos efectivo</h4><FaChartLine style={{color: "#0f172a"}} /></div>
+          <p style={{ fontSize: "1.8rem", fontWeight: "800", color: "#0f172a", margin: "10px 0 0" }}>${resumen.efectivo}</p>
         </div>
-        <div className="stat-card glass-card" style={{ borderLeft: "5px solid #1e3a8a" }}>
-          <div className="card-header"><h4>Ingresos en QR</h4><FaChartLine style={{color: "#1e3a8a"}} /></div>
-          <p className="amount" style={{ color: "#1e3a8a" }}>$8200.000</p>
+        <div className="stat-card glass-card" style={{ padding: "20px", background: "white", borderRadius: "15px", borderLeft: "5px solid #1e3a8a", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between" }}><h4>Ingresos en QR</h4><FaChartLine style={{color: "#1e3a8a"}} /></div>
+          <p style={{ fontSize: "1.8rem", fontWeight: "800", color: "#1e3a8a", margin: "10px 0 0" }}>${resumen.qr}</p>
         </div>
-        <div className="stat-card glass-card" style={{ borderLeft: "5px solid #1e40af" }}>
-          <div className="card-header"><h4>Pagos recibidos</h4><FaChartLine style={{color: "#1e40af"}} /></div>
-          <p className="amount" style={{ color: "#1e40af" }}>$500.000</p>
+        <div className="stat-card glass-card" style={{ padding: "20px", background: "white", borderRadius: "15px", borderLeft: "5px solid #1e40af", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between" }}><h4>Total General</h4><FaChartLine style={{color: "#1e40af"}} /></div>
+          <p style={{ fontSize: "1.8rem", fontWeight: "800", color: "#1e40af", margin: "10px 0 0" }}>${resumen.total}</p>
         </div>
       </div>
 
-      <div className="inventory-section">
-        <h3 className="section-subtitle" style={{ color: "#0f172a", marginBottom: "20px" }}>Inventario Actual</h3>
-        <div className="inventory-container">
-          
-          {/* TABLA SIN LINEA AZUL EN HEADER */}
-          <table className="inventory-table" style={{ borderCollapse: "collapse" }}>
-            <thead>
-              <tr style={{ borderBottom: "2px solid #e2e8f0" }}>
-                <th style={{ color: "#0f172a", padding: "15px", textAlign: "left" }}>Producto</th>
-                <th style={{ color: "#0f172a", padding: "15px", textAlign: "center" }}>Unidades</th>
-                <th style={{ color: "#0f172a", padding: "15px", textAlign: "right" }}>Ingresos</th>
-              </tr>
-            </thead>
-            <tbody>
-              {datosFiltrados.map((item) => (
-                <tr key={item.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                  <td className="product-cell" style={{ padding: "15px" }}>
-                    {getIcon(item.name)}
-                    {item.name}
-                  </td>
-                  <td style={{fontWeight: "bold", color: "#1e3a8a", textAlign: "center"}}>{item.units}</td>
-                  <td className="income-text" style={{color: "#0f172a", fontWeight: "bold", textAlign: "right"}}>{item.income}</td>
+      <div className="inventory-section" style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "30px" }}>
+        <div>
+          <h3 style={{ color: "#0f172a", marginBottom: "20px" }}>Inventario Actual</h3>
+          <div style={{ background: "white", borderRadius: "20px", padding: "20px", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ borderBottom: "2px solid #e2e8f0" }}>
+                  <th style={{ color: "#64748b", padding: "15px", textAlign: "left" }}>Producto</th>
+                  <th style={{ color: "#64748b", padding: "15px", textAlign: "center" }}>Unidades</th>
+                  <th style={{ color: "#64748b", padding: "15px", textAlign: "right" }}>Ingresos</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {datosFiltrados.map((item, index) => (
+                  <tr key={index} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                    <td style={{ padding: "15px", display: "flex", alignItems: "center", color: "#0f172a", fontWeight: "500" }}>
+                      {getIcon(item.name)}
+                      {item.name}
+                    </td>
+                    <td style={{fontWeight: "bold", color: "#1e3a8a", textAlign: "center"}}>{item.units}</td>
+                    <td style={{color: "#0f172a", fontWeight: "bold", textAlign: "right"}}>${item.income}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-          {/* GRÁFICA EN AZULES MUY OSCUROS */}
-          <div className="category-chart glass-card" style={{padding: "20px", borderRadius: "20px", position: "relative", border: "1px solid #e2e8f0"}}>
-            <p className="chart-title" style={{fontWeight: "900", marginBottom: "40px", color: "#0f172a", textAlign: "center"}}>Método de Pago</p>
-            
-            <div style={{ height: "150px", display: "flex", alignItems: "flex-end", justifyContent: "center", gap: "50px" }}>
-              
-              {/* Barra Efectivo - Medianoche */}
-              <div style={{ position: "relative", width: "55px", height: "100%", display: "flex", alignItems: "flex-end" }}
-                   onMouseEnter={() => setActiveTooltip("efectivo")}
-                   onMouseLeave={() => setActiveTooltip(null)}>
-                {activeTooltip === "efectivo" && (
-                  <div style={{ position: "absolute", top: "-45px", left: "50%", transform: "translateX(-50%)", background: "#0f172a", color: "white", padding: "6px 12px", borderRadius: "6px", fontSize: "12px", zIndex: 10 }}>
-                    $50,000.00
-                  </div>
-                )}
-                <div style={{ height: "85%", width: "100%", background: "linear-gradient(to top, #020617, #1e3a8a)", borderRadius: "6px 6px 0 0", cursor: "pointer" }}></div>
-              </div>
-
-              {/* Barra QR - Navy */}
-              <div style={{ position: "relative", width: "55px", height: "100%", display: "flex", alignItems: "flex-end" }}
-                   onMouseEnter={() => setActiveTooltip("qr")}
-                   onMouseLeave={() => setActiveTooltip(null)}>
-                {activeTooltip === "qr" && (
-                  <div style={{ position: "absolute", top: "-45px", left: "50%", transform: "translateX(-50%)", background: "#1e3a8a", color: "white", padding: "6px 12px", borderRadius: "6px", fontSize: "12px", zIndex: 10 }}>
-                    $8,200.00
-                  </div>
-                )}
-                <div style={{ height: "45%", width: "100%", background: "linear-gradient(to top, #1e3a8a, #1e40af)", borderRadius: "6px 6px 0 0", cursor: "pointer" }}></div>
-              </div>
-
+        {/* GRÁFICA DE MÉTODOS DE PAGO */}
+        <div style={{ background: "white", padding: "30px", borderRadius: "20px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}>
+          <p style={{fontWeight: "900", marginBottom: "40px", color: "#0f172a", textAlign: "center"}}>Método de Pago</p>
+          
+          <div style={{ height: "200px", display: "flex", alignItems: "flex-end", justifyContent: "center", gap: "40px" }}>
+            {/* Barra Efectivo */}
+            <div style={{ position: "relative", width: "50px", height: "100%", display: "flex", alignItems: "flex-end" }}
+                 onMouseEnter={() => setActiveTooltip("efectivo")}
+                 onMouseLeave={() => setActiveTooltip(null)}>
+              {activeTooltip === "efectivo" && (
+                <div style={{ position: "absolute", top: "-45px", left: "50%", transform: "translateX(-50%)", background: "#0f172a", color: "white", padding: "6px 12px", borderRadius: "6px", fontSize: "12px", zIndex: 10 }}>
+                  ${efectivo}
+                </div>
+              )}
+              <div style={{ height: `${(efectivo / totalGrafica) * 100}%`, width: "100%", background: "linear-gradient(to top, #020617, #1e3a8a)", borderRadius: "8px 8px 0 0", transition: "height 0.5s ease" }}></div>
             </div>
 
-            <div className="chart-legend" style={{marginTop: "30px", borderTop: "1px solid #f1f5f9", paddingTop: "15px", display: "flex", justifyContent: "center", gap: "25px"}}>
-              <span style={{fontSize: "0.85rem", color: "#0f172a", fontWeight: "700"}}><span className="dot" style={{backgroundColor: "#020617"}}></span> Efectivo</span>
-              <span style={{fontSize: "0.85rem", color: "#1e3a8a", fontWeight: "700"}}><span className="dot" style={{backgroundColor: "#1e3a8a"}}></span> QR</span>
+            {/* Barra QR */}
+            <div style={{ position: "relative", width: "50px", height: "100%", display: "flex", alignItems: "flex-end" }}
+                 onMouseEnter={() => setActiveTooltip("qr")}
+                 onMouseLeave={() => setActiveTooltip(null)}>
+              {activeTooltip === "qr" && (
+                <div style={{ position: "absolute", top: "-45px", left: "50%", transform: "translateX(-50%)", background: "#1e3a8a", color: "white", padding: "6px 12px", borderRadius: "6px", fontSize: "12px", zIndex: 10 }}>
+                  ${qr}
+                </div>
+              )}
+              <div style={{ height: `${(qr / totalGrafica) * 100}%`, width: "100%", background: "linear-gradient(to top, #1e3a8a, #3b82f6)", borderRadius: "8px 8px 0 0", transition: "height 0.5s ease" }}></div>
+            </div>
+          </div>
+
+          <div style={{marginTop: "30px", borderTop: "1px solid #f1f5f9", paddingTop: "20px", display: "flex", flexDirection: "column", gap: "10px"}}>
+            <div style={{display: "flex", justifyContent: "space-between", fontSize: "0.9rem"}}>
+              <span style={{color: "#64748b"}}>● Efectivo</span>
+              <span style={{fontWeight: "700", color: "#0f172a"}}>{((efectivo/totalGrafica)*100).toFixed(1)}%</span>
+            </div>
+            <div style={{display: "flex", justifyContent: "space-between", fontSize: "0.9rem"}}>
+              <span style={{color: "#3b82f6"}}>● Pago QR</span>
+              <span style={{fontWeight: "700", color: "#1e3a8a"}}>{((qr/totalGrafica)*100).toFixed(1)}%</span>
             </div>
           </div>
         </div>

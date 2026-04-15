@@ -1,190 +1,197 @@
-import React, { useRef, useState, useMemo } from 'react';
-import { 
-  FaSearch, FaPaperclip, FaArrowUp, FaArrowDown, 
-  FaCheckCircle, FaTrashAlt, FaFileAlt 
-} from 'react-icons/fa';
+import React, { useState, useEffect, useMemo } from 'react';
+import { FaSearch, FaTicketAlt, FaPlusCircle, FaHistory, FaUser, FaStore, FaTag } from 'react-icons/fa';
 
 const Reportes = () => {
-  const fileInputRef = useRef(null);
-  const [fileName, setFileName] = useState("");
-  const [searchTerm, setSearchTerm] = useState(""); 
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Datos de ejemplo con más información para FluxPay
-  const [reportesData] = useState([
-    { id: "9132102", estado: "Pendiente", fecha: "2026-03-25", monto: "$1,200" },
-    { id: "245533", estado: "Pendiente", fecha: "2026-03-26", monto: "$450" },
-    { id: "1232455", estado: "Pendiente", fecha: "2026-03-27", monto: "$2,100" },
-    { id: "1213231", estado: "Revisado", fecha: "2026-03-20", monto: "$890" },
-  ]);
+  // ESTADOS PARA QUE LOS SELECTS SEAN EDITABLES
+  const [categoria, setCategoria] = useState("Pago QR");
+  const [prioridad, setPrioridad] = useState("Baja");
 
-  // Optimización de búsqueda con useMemo
-  const reportesFiltrados = useMemo(() => {
-    return reportesData.filter(item => 
-      item.id.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [searchTerm, reportesData]);
+  useEffect(() => { fetchTickets(); }, []);
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Validación: solo permitir imágenes o PDFs para evidencias
-      if (file.size > 5000000) { // 5MB limit
-        alert("El archivo es demasiado grande.");
-        return;
-      }
-      setFileName(file.name);
+  const fetchTickets = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/tickets');
+      if (!response.ok) throw new Error("Error en servidor");
+      const data = await response.json();
+      setTickets(data);
+    } catch (error) {
+      console.error("Error FluxPay:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const removeFile = (e) => {
-    e.stopPropagation(); 
-    setFileName("");
-    if (fileInputRef.current) fileInputRef.current.value = "";
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    
+    const datosEnvio = {
+      cliente: formData.get('cliente_nombre'), 
+      negocio_id: formData.get('negocio_id'),
+      mensaje: formData.get('asunto'), 
+      prioridad: prioridad, // Usamos el estado actual
+      categoria: categoria, // Usamos el estado actual
+      estado: 'Pendiente'
+    };
+
+    try {
+      const response = await fetch('http://localhost:8000/api/tickets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(datosEnvio)
+      });
+
+      if (response.ok) {
+        e.target.reset();
+        setCategoria("Pago QR"); // Reiniciamos a valor por defecto
+        setPrioridad("Baja");    // Reiniciamos a valor por defecto
+        fetchTickets(); 
+      }
+    } catch (error) {
+      alert("Error al conectar con la base de datos");
+    }
+  };
+
+  const filtrados = useMemo(() => {
+    return tickets.filter(t => 
+      t.mensaje?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      t.cliente?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      t.id.toString().includes(searchTerm)
+    );
+  }, [searchTerm, tickets]);
+
+  const colors = {
+    primary: '#052659', 
+    dark: '#021024',
+    bg: '#f1f5f9',
+    white: '#ffffff',
+    textMuted: '#64748b'
   };
 
   return (
-    <section className="reportes-view" style={{ padding: '20px', backgroundColor: '#f8fafc' }}>
-      {/* 1. TÍTULO Y ENCABEZADO */}
-      <div className="reportes-title-section" style={{ marginBottom: '30px' }}>
-        <h2 className="section-main-title" style={{ color: '#0e2a5a', fontWeight: 'bold' }}>Reportes Operativos</h2>
-        <p className="section-subtitle" style={{ color: '#64748b' }}>Supervisión de transacciones y carga de evidencias FluxPay.</p>
-      </div>
-
-      {/* 2. TABLA DE MÉTRICAS OPERATIVAS */}
-      <div className="metrics-container" style={{ marginBottom: '30px' }}>
-        <div className="metrics-table" style={{ background: '#fff', borderRadius: '15px', padding: '20px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
-          <div className="metrics-header" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', paddingBottom: '10px', borderBottom: '1px solid #e2e8f0', fontWeight: '600', color: '#64748b' }}>
-            <span>Indicador</span>
-            <span>Valor Actual</span>
-            <span>Rendimiento</span>
-          </div>
-          
-          {[
-            { label: "Ingresos Totales", value: "$25,400.00", trend: "12.5%", pos: true },
-            { label: "Cobros vía QR", value: "145 ops", trend: "5.2%", pos: true },
-            { label: "Nuevos Clientes", value: "22 pax", trend: "2.1%", pos: false },
-          ].map((metric, idx) => (
-            <div key={idx} className="metric-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', padding: '15px 0', borderBottom: idx !== 2 ? '1px solid #f1f5f9' : 'none', alignItems: 'center' }}>
-              <span className="metric-name" style={{ fontWeight: '500' }}>{metric.label}</span>
-              <span className="metric-value" style={{ fontWeight: 'bold', color: '#0e2a5a' }}>{metric.value}</span>
-              <span className={`trend ${metric.pos ? 'positive' : 'negative'}`} style={{ color: metric.pos ? '#10b981' : '#ef4444', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                {metric.pos ? <FaArrowUp /> : <FaArrowDown />} {metric.trend}
-              </span>
-            </div>
-          ))}
+    <div style={{ padding: '30px', backgroundColor: colors.bg, minHeight: '100vh', fontFamily: "'Inter', sans-serif" }}>
+      
+      <div style={{ 
+        background: colors.dark, color: colors.white, padding: '35px 45px', borderRadius: '16px', 
+        marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        boxShadow: '0 4px 20px rgba(2, 16, 36, 0.2)'
+      }}>
+        <div>
+          <h1 style={{ margin: 0, fontSize: '1.9rem', fontWeight: '800' }}>Centro de Soporte</h1>
+          <p style={{ margin: '5px 0 0', opacity: 0.8, fontSize: '1rem' }}>Panel de incidencias para <b>FluxPay</b></p>
         </div>
+        <FaTicketAlt size={45} style={{ opacity: 0.3 }} />
       </div>
 
-      {/* 3. ACCIONES Y LISTADO */}
-      <div className="reportes-grid-bottom" style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '25px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr', gap: '30px' }}>
         
-        {/* BUSCADOR Y ADJUNTAR */}
-        <div className="action-card search-card" style={{ background: '#fff', padding: '25px', borderRadius: '15px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
-          <h3 className="card-mini-title" style={{ fontSize: '1.1rem', marginBottom: '20px', color: '#0e2a5a' }}>Gestión de Casos</h3>
+        <div style={{ background: colors.white, padding: '35px', borderRadius: '16px', border: `1px solid ${colors.primary}20`, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '25px', color: colors.primary }}>
+            <FaPlusCircle size={22} />
+            <h3 style={{ margin: 0, fontWeight: '700' }}>Nueva Solicitud</h3>
+          </div>
           
-          <div className="search-input-wrapper" style={{ position: 'relative', marginBottom: '20px' }}>
-            <FaSearch style={{ position: 'absolute', left: '15px', top: '15px', color: '#94a3b8' }} />
-            <input 
-              type="text" 
-              placeholder="Buscar por ID..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="modern-input"
-              style={{ width: '100%', padding: '12px 12px 12px 45px', borderRadius: '10px', border: '1px solid #e2e8f0', outline: 'none' }}
-            />
-          </div>
-
-          <div className="upload-container">
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              onChange={handleFileChange} 
-              accept=".jpg,.png,.pdf"
-              style={{ display: 'none' }} 
-            />
-            <div 
-              className={`upload-zone ${fileName ? 'active' : ''}`} 
-              onClick={() => fileInputRef.current.click()}
-              style={{ 
-                border: '2px dashed #cbd5e1', 
-                borderRadius: '12px', 
-                padding: '30px', 
-                textAlign: 'center', 
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                backgroundColor: fileName ? '#f0fdf4' : 'transparent',
-                borderColor: fileName ? '#22c55e' : '#cbd5e1'
-              }}
-            >
-              {fileName ? (
-                <div className="file-info-pro" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-                  <FaCheckCircle style={{ color: '#22c55e' }} />
-                  <span style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{fileName}</span>
-                  <button onClick={removeFile} style={{ border: 'none', background: 'none', color: '#ef4444', cursor: 'pointer' }}>
-                    <FaTrashAlt />
-                  </button>
-                </div>
-              ) : (
-                <div style={{ color: '#64748b' }}>
-                  <FaPaperclip style={{ fontSize: '1.5rem', marginBottom: '10px' }} />
-                  <p style={{ margin: 0 }}>Adjuntar Evidencia</p>
-                  <small>(JPG, PNG o PDF)</small>
-                </div>
-              )}
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: colors.primary, marginBottom: '8px', textTransform: 'uppercase' }}>Nombre del Cliente</label>
+              <div style={{ position: 'relative' }}>
+                <FaUser style={{ position: 'absolute', left: '12px', top: '14px', color: colors.primary }} />
+                <input name="cliente_nombre" required placeholder="Ej: Javier López" style={{ width: '100%', padding: '12px 12px 12px 42px', borderRadius: '10px', border: `1.5px solid ${colors.primary}`, fontSize: '0.95rem', outline: 'none' }} />
+              </div>
             </div>
-          </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: colors.primary, marginBottom: '8px', textTransform: 'uppercase' }}>ID Negocio</label>
+              <div style={{ position: 'relative' }}>
+                <FaStore style={{ position: 'absolute', left: '12px', top: '14px', color: colors.primary }} />
+                <input name="negocio_id" type="number" required placeholder="Ej: 1" style={{ width: '100%', padding: '12px 12px 12px 42px', borderRadius: '10px', border: `1.5px solid ${colors.primary}`, fontSize: '0.95rem', outline: 'none' }} />
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: colors.primary, marginBottom: '8px', textTransform: 'uppercase' }}>Mensaje del Reporte</label>
+              <textarea name="asunto" required placeholder="Describe el problema a detalle..." style={{ width: '100%', padding: '12px', borderRadius: '10px', border: `1.5px solid ${colors.primary}`, minHeight: '110px', fontSize: '0.95rem', resize: 'none', outline: 'none' }} />
+            </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '25px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: colors.primary, marginBottom: '8px' }}>CATEGORÍA</label>
+                <select 
+                  value={categoria} 
+                  onChange={(e) => setCategoria(e.target.value)} 
+                  style={{ width: '100%', padding: '12px', borderRadius: '10px', border: `1.5px solid ${colors.primary}`, backgroundColor: 'white', fontWeight: '600', cursor: 'pointer' }}
+                >
+                  <option value="Pago QR">Pago QR</option>
+                  <option value="App Cliente">App Cliente</option>
+                  <option value="Terminal">Terminal</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '800', color: colors.primary, marginBottom: '8px' }}>PRIORIDAD</label>
+                <select 
+                  value={prioridad} 
+                  onChange={(e) => setPrioridad(e.target.value)} 
+                  style={{ width: '100%', padding: '12px', borderRadius: '10px', border: `1.5px solid ${colors.primary}`, backgroundColor: 'white', fontWeight: '600', cursor: 'pointer' }}
+                >
+                  <option value="Baja">Baja</option>
+                  <option value="Media">Media</option>
+                  <option value="Alta">Alta</option>
+                </select>
+              </div>
+            </div>
+
+            <button type="submit" style={{ width: '100%', padding: '16px', background: colors.primary, color: colors.white, border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: '800', fontSize: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
+              <FaTag size={14} /> Generar y Guardar Ticket
+            </button>
+          </form>
         </div>
 
-        {/* TABLA DE REPORTES */}
-        <div className="action-card table-card" style={{ background: '#fff', padding: '25px', borderRadius: '15px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
-          <h3 className="card-mini-title" style={{ fontSize: '1.1rem', marginBottom: '20px', color: '#0e2a5a' }}>Movimientos Recientes</h3>
-          <div className="table-responsive">
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ textAlign: 'left', borderBottom: '2px solid #f1f5f9', color: '#64748b' }}>
-                  <th style={{ padding: '12px' }}>Caso ID</th>
-                  <th style={{ padding: '12px' }}>Monto</th>
-                  <th style={{ padding: '12px' }}>Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reportesFiltrados.length > 0 ? (
-                  reportesFiltrados.map((item) => (
-                    <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '15px 12px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <FaFileAlt style={{ color: '#3b82f6' }} />
-                          <strong>#{item.id}</strong>
-                        </div>
-                      </td>
-                      <td style={{ padding: '15px 12px', fontWeight: '600' }}>{item.monto}</td>
-                      <td style={{ padding: '15px 12px' }}>
-                        <span style={{ 
-                          padding: '5px 12px', 
-                          borderRadius: '20px', 
-                          fontSize: '0.85rem',
-                          fontWeight: '500',
-                          backgroundColor: item.estado === 'Revisado' ? '#dcfce7' : '#fef9c3',
-                          color: item.estado === 'Revisado' ? '#166534' : '#854d0e'
-                        }}>
-                          {item.estado}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="3" style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
-                      No se encontraron reportes con el ID: <strong>{searchTerm}</strong>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+        <div style={{ background: colors.white, padding: '35px', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: colors.dark }}>
+              <FaHistory size={22} />
+              <h3 style={{ margin: 0, fontWeight: '800' }}>Historial en BD</h3>
+            </div>
+            <div style={{ position: 'relative' }}>
+              <FaSearch style={{ position: 'absolute', left: '12px', top: '12px', color: colors.primary }} />
+              <input 
+                placeholder="Buscar cliente o ID..." 
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ padding: '10px 15px 10px 40px', borderRadius: '10px', border: `1.5px solid ${colors.primary}40`, fontSize: '0.9rem', width: '220px' }}
+              />
+            </div>
+          </div>
+
+          <div style={{ maxHeight: '550px', overflowY: 'auto', paddingRight: '10px' }}>
+            {loading ? <p style={{ color: colors.textMuted }}>Cargando...</p> : 
+              filtrados.map(t => (
+                <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', borderBottom: '1px solid #f1f5f9', marginBottom: '10px', backgroundColor: '#fafbfc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: '800', color: colors.dark, fontSize: '1.05rem' }}>{t.cliente} <span style={{ fontWeight: '400', fontSize: '0.8rem', color: colors.textMuted }}>• Negocio: {t.negocio_id}</span></div>
+                    <div style={{ color: '#334155', fontSize: '0.95rem', margin: '6px 0' }}>{t.mensaje}</div>
+                    <div style={{ fontSize: '0.75rem', color: colors.textMuted }}>TK-{t.id} • {t.categoria}</div>
+                  </div>
+                  <div style={{ textAlign: 'right', marginLeft: '20px' }}>
+                    <div style={{ 
+                      fontSize: '0.7rem', padding: '5px 12px', borderRadius: '25px', fontWeight: '900', textTransform: 'uppercase',
+                      backgroundColor: t.prioridad === 'Alta' ? '#fee2e2' : t.prioridad === 'Media' ? '#e0f2fe' : '#f1f5f9',
+                      color: t.prioridad === 'Alta' ? '#dc2626' : t.prioridad === 'Media' ? '#0284c7' : '#475569',
+                      border: `1px solid ${t.prioridad === 'Alta' ? '#fecaca' : '#bae6fd'}`
+                    }}>
+                      {t.prioridad}
+                    </div>
+                  </div>
+                </div>
+              ))
+            }
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 
