@@ -1,5 +1,5 @@
 import React from "react";
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet, NavLink, useNavigate } from "react-router-dom"; // Importamos useNavigate
 
 import {
     FaHome, FaMoneyBill, FaQrcode, FaHistory,
@@ -9,6 +9,18 @@ import {
 import "./LayoutNegocio.css";
 
 export default function LayoutNegocio() {
+    const navigate = useNavigate(); // Hook para redireccionar
+
+    const handleLogout = () => {
+        if (window.confirm("¿Estás seguro de que quieres cerrar sesión?")) {
+            // 1. Eliminamos el token y datos del usuario
+            localStorage.removeItem("token");
+            localStorage.removeItem("user"); 
+            
+            // 2. Redirigimos al Login
+            navigate("/"); 
+        }
+    };
 
     return (
         <div className="admin-layout">
@@ -44,7 +56,6 @@ export default function LayoutNegocio() {
                                 </NavLink>
                             </li>
                             <li>
-                                {/* Al usar NavLink sin 'state', cargará la vista de "Gestión" (la de tu imagen) */}
                                 <NavLink to="/Negocio/QR">
                                     <FaQrcode /> <span>QR</span>
                                 </NavLink>
@@ -66,7 +77,7 @@ export default function LayoutNegocio() {
                                     <FaUniversity /> <span>Cuenta / Banco</span>
                                 </NavLink>
                             </li>
-                            {/* Cambia el <li> estático por un NavLink */}
+                            
                             <li>
                                 <NavLink to="/Negocio/Reportes">
                                     <FaChartBar /> <span>Reportes</span>
@@ -86,7 +97,7 @@ export default function LayoutNegocio() {
                     className="logout"
                     style={{
                         display: 'flex',
-                        alignItems: 'center', // Corregido: 'center' entre comillas
+                        alignItems: 'center', 
                         gap: '12px',
                         padding: '12px 20px',
                         cursor: 'pointer',
@@ -105,12 +116,7 @@ export default function LayoutNegocio() {
                         e.currentTarget.style.backgroundColor = 'transparent';
                         e.currentTarget.style.color = '#94a3b8';
                     }}
-                    onClick={() => {
-                        if (window.confirm("¿Estás seguro de que quieres cerrar sesión?")) {
-                            console.log("Cerrando sesión...");
-                            // Aquí puedes añadir: window.location.href = '/login';
-                        }
-                    }}
+                    onClick={handleLogout} // Usamos la función corregida
                 >
                     <FaSignOutAlt style={{ fontSize: '18px' }} />
                     <span>Cerrar sesión</span>
@@ -120,7 +126,7 @@ export default function LayoutNegocio() {
             {/* MAIN */}
             <main className="admin-main">
 
-                {/* NUEVO HEADER */}
+                {/* HEADER */}
                 <header className="negocio-header">
 
                     <div className="negocio-header-left">

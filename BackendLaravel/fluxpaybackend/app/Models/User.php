@@ -32,4 +32,10 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+// --- ESTO ES LO ÚNICO QUE TIENES QUE AGREGAR ---
+    public function movimientos()
+    {
+        // Conecta con la tabla 'movimiento' usando 'iduser' como llave
+        return $this->hasMany(Movimiento::class, 'iduser');
+    }
 }

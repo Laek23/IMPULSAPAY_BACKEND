@@ -1,219 +1,211 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { 
-  FaPlus, FaTrash, FaEdit, FaSmile, FaExclamationTriangle,
-  FaChevronLeft, FaChevronRight 
+  FaPlus, FaTrash, FaEdit, FaExclamationTriangle,
+  FaChevronLeft, FaChevronRight, FaBoxOpen
 } from "react-icons/fa";
 
 export default function ProductosNegocio() {
-  // --- ESTADOS ---
+  // ESTADOS
+  const [productos, setProductos] = useState([]);
+  const [marcas, setMarcas] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [productoAEliminar, setProductoAEliminar] = useState(null);
   const [editandoId, setEditandoId] = useState(null);
-  const [emojiSeleccionado, setEmojiSeleccionado] = useState("🛍️");
-
-  // Estados de Paginación
   const [paginaActual, setPaginaActual] = useState(1);
-  const ITEMS_POR_PAGINA = 5;
+  const registrosPorPagina = 7;
 
-  const colores = {
-    primario: "#0e2a5a",
-    azulBoton: "#11264c",
-    secundario: "#1e417c",
-    fondoCapa: "#eef2f7",
-    fondoCírculo: "#f0f4f9", 
-    textoGris: "#64748b",
-    eliminar: "#ef4444"
-  };
+  const API_URL = "http://localhost:8000/api/productos";
+  const MARCAS_URL = "http://localhost:8000/api/marcas";
 
-  const opcionesEmojis = ["🥡", "🍪", "🥤", "🍬", "🍞", "🍎", "🍕", "🍦", "🍟", "🛍️"];
+  const getAuthHeader = () => ({
+    headers: { 
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+      "Content-Type": "application/json"
+    }
+  });
 
-  const [productos, setProductos] = useState([
-    { id: 1, name: "Galletas", units: 10, income: "$1912", emoji: "🍪" },
-    { id: 2, name: "Sabritas", units: 12, income: "$1121", emoji: "🥡" },
-    { id: 3, name: "Refrescos", units: 6, income: "$871", emoji: "🥤" },
-    { id: 4, name: "Pan Dulce", units: 20, income: "$450", emoji: "🍞" },
-    { id: 5, name: "Jugos", units: 15, income: "$300", emoji: "🍎" },
-    { id: 6, name: "Helados", units: 8, income: "$240", emoji: "🍦" },
-  ]);
-
-  // --- LÓGICA DE PAGINACIÓN ---
-  const totalPaginas = Math.ceil(productos.length / ITEMS_POR_PAGINA);
-  const indiceUltimo = paginaActual * ITEMS_POR_PAGINA;
-  const indicePrimero = indiceUltimo - ITEMS_POR_PAGINA;
-  const productosVisibles = productos.slice(indicePrimero, indiceUltimo);
-
-  const cambiarPagina = (numero) => {
-    if (numero >= 1 && numero <= totalPaginas) {
-      setPaginaActual(numero);
+  const fetchData = async () => {
+    try {
+      const [resProd, resMarcas] = await Promise.all([
+        axios.get(API_URL, getAuthHeader()),
+        axios.get(MARCAS_URL, getAuthHeader())
+      ]);
+      setProductos(resProd.data || []);
+      setMarcas(resMarcas.data || []);
+    } catch (err) {
+      console.error("Error en FluxPay:", err);
     }
   };
 
-  // --- MANEJADORES ---
-  const handleGuardar = (e) => {
+  useEffect(() => { fetchData(); }, []);
+
+  // LÓGICA DE PAGINACIÓN (Basada en Historial)
+  const ultimoIndice = paginaActual * registrosPorPagina;
+  const primerIndice = ultimoIndice - registrosPorPagina;
+  const registrosPagina = productos.slice(primerIndice, ultimoIndice);
+  const totalPaginas = Math.ceil(productos.length / registrosPorPagina);
+
+  const handleGuardar = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    const nombre = formData.get("nombre");
-    const unidades = formData.get("unidades");
-    const precio = formData.get("precio");
-    const emojiFinal = formData.get("emojiManual") || emojiSeleccionado;
+    const datos = {
+      nombre: formData.get("nombre"),
+      idmarca: parseInt(formData.get("idmarca")),
+      tipoProducto: formData.get("tipoProducto"),
+      precio: parseFloat(formData.get("precio")),
+      idnegocio: 1,
+      status: 1
+    };
 
-    if (editandoId) {
-      setProductos(productos.map(p => 
-        p.id === editandoId 
-          ? { ...p, name: nombre, units: unidades, income: `$${precio}`, emoji: emojiFinal } 
-          : p
-      ));
-    } else {
-      const nuevo = {
-        id: Date.now(),
-        name: nombre,
-        units: unidades,
-        income: `$${precio}`,
-        emoji: emojiFinal
-      };
-      setProductos([...productos, nuevo]);
-      setPaginaActual(1);
+    try {
+      if (editandoId) {
+        await axios.put(`${API_URL}/${editandoId}`, datos, getAuthHeader());
+      } else {
+        await axios.post(API_URL, datos, getAuthHeader());
+      }
+      fetchData();
+      cerrarModal();
+    } catch (err) {
+      alert("Error al procesar la solicitud");
     }
-    cerrarModal();
   };
 
-  const prepararEdicion = (producto) => {
-    setEditandoId(producto.id);
-    setEmojiSeleccionado(producto.emoji);
-    setShowModal(true);
-  };
-
-  const cerrarModal = () => {
-    setShowModal(false);
-    setEditandoId(null);
-    setEmojiSeleccionado("🛍️");
-  };
-
-  const ejecutarEliminacion = () => {
-    const nuevosProductos = productos.filter(p => p.id !== productoAEliminar.id);
-    setProductos(nuevosProductos);
-    if (nuevosProductos.slice(indicePrimero, indiceUltimo).length === 0 && paginaActual > 1) {
-      setPaginaActual(paginaActual - 1);
+  const ejecutarEliminacion = async () => {
+    try {
+      await axios.delete(`${API_URL}/${productoAEliminar.id}`, getAuthHeader());
+      fetchData();
+      setShowDeleteModal(false);
+    } catch (err) {
+      alert("Error al eliminar");
     }
-    setShowDeleteModal(false);
-    setProductoAEliminar(null);
   };
+
+  const cerrarModal = () => { setShowModal(false); setEditandoId(null); };
+
+  const productoActual = editandoId ? productos.find(p => p.id === editandoId) : null;
 
   return (
-    <div className="productos-view" style={{ padding: "30px", backgroundColor: "#f4f7fa", minHeight: "100vh", fontFamily: "sans-serif" }}>
-      
+    <div style={containerStyle}>
       {/* HEADER */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "25px" }}>
-        <h2 style={{ color: colores.primario, margin: 0, fontSize: "24px", fontWeight: "bold" }}>Productos</h2>
-        <button 
-          onClick={() => setShowModal(true)} 
-          style={{ 
-            background: colores.azulBoton, color: "white", padding: "12px 20px", borderRadius: "10px", 
-            border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", 
-            fontWeight: "600", fontSize: "14px"
-          }}
-        >
-          <FaPlus size={12} /> Agregar producto
+      <div style={headerStyle}>
+        <div>
+          <h2 style={titleStyle}>Inventario</h2>
+          <p style={subtitleStyle}>{productos.length} productos registrados</p>
+        </div>
+        <button onClick={() => setShowModal(true)} style={btnPlusStyle}>
+          <FaPlus size={12} /> Nuevo Producto
         </button>
       </div>
 
-      {/* TABLA CON PAGINACIÓN */}
-      <div style={{ background: "white", borderRadius: "18px", boxShadow: "0 4px 20px rgba(0,0,0,0.03)", overflow: "hidden", padding: "10px" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      {/* TABLA */}
+      <div style={tableCardStyle}>
+        <table style={tableStyle}>
           <thead>
-            <tr style={{ textAlign: "left", borderBottom: "1px solid #f1f5f9" }}>
-              <th style={{ padding: "20px", color: colores.textoGris, fontSize: "14px", fontWeight: "600" }}>Producto</th>
-              <th style={{ padding: "20px", color: colores.textoGris, fontSize: "14px", fontWeight: "600" }}>Unidades</th>
-              <th style={{ padding: "20px", color: colores.textoGris, fontSize: "14px", fontWeight: "600" }}>Ingresos</th>
-              <th style={{ padding: "20px", color: colores.textoGris, fontSize: "14px", fontWeight: "600", textAlign: "right" }}>Acciones</th>
+            <tr style={thRowStyle}>
+              <th style={thStyle}>PRODUCTO</th>
+              <th style={thStyle}>VARIEDAD</th>
+              <th style={thStyle}>PRECIO</th>
+              <th style={{ ...thStyle, textAlign: "right" }}>ACCIONES</th>
             </tr>
           </thead>
           <tbody>
-            {productosVisibles.map((item) => (
-              <tr key={item.id} style={{ borderBottom: "1px solid #f8fafc" }}>
-                <td style={{ padding: "12px 20px", display: "flex", alignItems: "center", gap: "15px" }}>
-                  <div style={{ 
-                    width: "42px", height: "42px", backgroundColor: colores.fondoCírculo, 
-                    borderRadius: "50%", display: "flex", alignItems: "center", 
-                    justifyContent: "center", fontSize: "20px" 
-                  }}>
-                    {item.emoji}
-                  </div>
-                  <span style={{ fontWeight: "600", color: colores.primario }}>{item.name}</span>
-                </td>
-                <td style={{ padding: "20px", color: colores.primario, fontWeight: "500" }}>{item.units}</td>
-                <td style={{ padding: "20px", color: colores.primario, fontWeight: "700" }}>{item.income}</td>
-                <td style={{ padding: "20px", textAlign: "right" }}>
-                  <button onClick={() => prepararEdicion(item)} style={{ color: colores.secundario, background: "none", border: "none", cursor: "pointer", marginRight: "12px" }}><FaEdit size={16} /></button>
-                  <button onClick={() => { setProductoAEliminar(item); setShowDeleteModal(true); }} style={{ color: colores.eliminar, background: "none", border: "none", cursor: "pointer" }}><FaTrash size={16} /></button>
-                </td>
-              </tr>
-            ))}
+            {registrosPagina.length > 0 ? (
+              registrosPagina.map((item) => (
+                <tr key={item.id} style={trStyle}>
+                  <td style={tdStyle}>
+                    <div style={brandText}>
+                      {marcas.find(m => String(m.id) === String(item.idmarca))?.nombre || "Genérico"}
+                    </div>
+                    <div style={productText}>{item.nombre}</div>
+                  </td>
+                  <td style={tdStyle}>{item.tipoProducto}</td>
+                  <td style={priceText}>${item.precio.toLocaleString()}</td>
+                  <td style={{ ...tdStyle, textAlign: "right" }}>
+                    <button onClick={() => { setEditandoId(item.id); setShowModal(true); }} style={actionBtn}><FaEdit /></button>
+                    <button onClick={() => { setProductoAEliminar(item); setShowDeleteModal(true); }} style={deleteBtn}><FaTrash /></button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr><td colSpan="4" style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>No hay productos registrados.</td></tr>
+            )}
           </tbody>
         </table>
 
-        {/* CONTROLES DE PAGINACIÓN */}
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "10px", marginTop: "25px", paddingBottom: "15px" }}>
-          <button 
-            onClick={() => cambiarPagina(paginaActual - 1)}
-            disabled={paginaActual === 1}
-            style={estiloBtnPaginacion(false, paginaActual === 1)}
-          >
-            <FaChevronLeft size={12} />
-          </button>
+        {/* PAGINACIÓN ESTILO HISTORIAL */}
+        {totalPaginas > 1 && (
+          <div style={estiloPaginacion}>
+            <p style={{ fontSize: "14px", color: "#64748b", margin: 0 }}>
+              Mostrando <span style={{ fontWeight: "700", color: "#0e2a5a" }}>{primerIndice + 1}</span> a <span style={{ fontWeight: "700", color: "#0e2a5a" }}>{Math.min(ultimoIndice, productos.length)}</span> de {productos.length} registros
+            </p>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button 
+                onClick={() => setPaginaActual(p => Math.max(1, p - 1))}
+                disabled={paginaActual === 1}
+                style={estiloBtnPagina(paginaActual === 1)}
+              >
+                <FaChevronLeft fontSize="12px" />
+              </button>
+              
+              {[...Array(totalPaginas)].map((_, i) => (
+                <button
+                  key={i + 1}
+                  onClick={() => setPaginaActual(i + 1)}
+                  style={paginaActual === i + 1 ? estiloBtnPaginaActivo : estiloBtnPagina(false)}
+                >
+                  {i + 1}
+                </button>
+              ))}
 
-          {[...Array(totalPaginas)].map((_, i) => (
-            <button
-              key={i + 1}
-              onClick={() => cambiarPagina(i + 1)}
-              style={estiloBtnPaginacion(paginaActual === i + 1)}
-            >
-              {i + 1}
-            </button>
-          ))}
-
-          <button 
-            onClick={() => cambiarPagina(paginaActual + 1)}
-            disabled={paginaActual === totalPaginas}
-            style={estiloBtnPaginacion(false, paginaActual === totalPaginas)}
-          >
-            <FaChevronRight size={12} />
-          </button>
-        </div>
+              <button 
+                onClick={() => setPaginaActual(p => Math.min(totalPaginas, p + 1))}
+                disabled={paginaActual === totalPaginas}
+                style={estiloBtnPagina(paginaActual === totalPaginas)}
+              >
+                <FaChevronRight fontSize="12px" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* MODAL NUEVO / EDITAR */}
+      {/* MODAL FORMULARIO */}
       {showModal && (
-        <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", background: "rgba(0,0,0,0.3)", backdropFilter: "blur(2px)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 }}>
-          <div style={{ background: "white", padding: "30px", borderRadius: "24px", width: "380px", boxShadow: "0 10px 40px rgba(0,0,0,0.1)" }}>
-            <h3 style={{ marginTop: 0, color: colores.primario, marginBottom: "20px" }}>{editandoId ? "Editar Producto" : "Nuevo Producto"}</h3>
-            <form onSubmit={handleGuardar} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-              <div>
-                <label style={{ fontSize: "13px", color: colores.textoGris, marginBottom: "5px", display: "block" }}>Nombre</label>
-                <input name="nombre" placeholder="Ej. Sabritas" defaultValue={editandoId ? productos.find(p => p.id === editandoId).name : ""} required style={{ width: "93%", padding: "12px", borderRadius: "10px", border: "1px solid #e2e8f0" }} />
+        <div style={overlayStyle}>
+          <div style={modalStyle}>
+            <div style={modalHeader}>
+              <FaBoxOpen color="#0e2a5a" size={20} />
+              <h3 style={{ margin: 0, fontSize: '18px' }}>{editandoId ? "Editar Producto" : "Nuevo Producto"}</h3>
+            </div>
+            <form onSubmit={handleGuardar} style={formStyle}>
+              <div style={inputGroup}>
+                <label style={labelStyle}>Nombre / Categoría</label>
+                <input name="nombre" defaultValue={productoActual?.nombre} required style={inputStyle} placeholder="Ej. Perfume" />
               </div>
-              <div style={{ display: "flex", gap: "10px" }}>
-                <div style={{ flex: 1 }}>
-                  <label style={{ fontSize: "13px", color: colores.textoGris, marginBottom: "5px", display: "block" }}>Unidades</label>
-                  <input name="unidades" type="number" placeholder="0" defaultValue={editandoId ? productos.find(p => p.id === editandoId).units : ""} required style={{ width: "85%", padding: "12px", borderRadius: "10px", border: "1px solid #e2e8f0" }} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <label style={{ fontSize: "13px", color: colores.textoGris, marginBottom: "5px", display: "block" }}>Precio</label>
-                  <input name="precio" placeholder="0.00" defaultValue={editandoId ? productos.find(p => p.id === editandoId).income.replace("$", "") : ""} required style={{ width: "85%", padding: "12px", borderRadius: "10px", border: "1px solid #e2e8f0" }} />
-                </div>
+              
+              <div style={inputGroup}>
+                <label style={labelStyle}>Marca</label>
+                <select name="idmarca" defaultValue={productoActual?.idmarca} required style={inputStyle}>
+                  <option value="">Seleccionar...</option>
+                  {marcas.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
+                </select>
               </div>
-              <div>
-                <label style={{ fontSize: "13px", color: colores.textoGris, marginBottom: "10px", display: "block" }}>Icono</label>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "10px" }}>
-                  {opcionesEmojis.map(emo => (
-                    <span key={emo} onClick={() => setEmojiSeleccionado(emo)} style={{ fontSize: "20px", cursor: "pointer", padding: "8px", borderRadius: "8px", background: emojiSeleccionado === emo ? "#eef2f7" : "#f8fafc", border: emojiSeleccionado === emo ? `1px solid ${colores.azulBoton}` : "1px solid transparent" }}>{emo}</span>
-                  ))}
-                </div>
+
+              <div style={inputGroup}>
+                <label style={labelStyle}>Variedad (Sabor/Modelo)</label>
+                <input name="tipoProducto" defaultValue={productoActual?.tipoProducto} required style={inputStyle} placeholder="Ej. Citríco" />
               </div>
-              <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-                <button type="button" onClick={cerrarModal} style={{ flex: 1, padding: "14px", borderRadius: "12px", border: "1px solid #e2e8f0", background: "white", color: colores.textoGris, fontWeight: "600", cursor: "pointer" }}>Cancelar</button>
-                <button type="submit" style={{ flex: 1, padding: "14px", background: colores.azulBoton, color: "white", border: "none", borderRadius: "12px", cursor: "pointer", fontWeight: "bold" }}>Guardar</button>
+              
+              <div style={inputGroup}>
+                <label style={labelStyle}>Precio de venta</label>
+                <input name="precio" type="number" step="0.01" defaultValue={productoActual?.precio} required style={inputStyle} placeholder="0.00" />
+              </div>
+
+              <div style={modalFooter}>
+                <button type="button" onClick={cerrarModal} style={btnCancel}>Cancelar</button>
+                <button type="submit" style={btnSave}>Guardar</button>
               </div>
             </form>
           </div>
@@ -222,16 +214,13 @@ export default function ProductosNegocio() {
 
       {/* MODAL ELIMINAR */}
       {showDeleteModal && (
-        <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1100 }}>
-          <div style={{ background: "white", padding: "40px", borderRadius: "24px", width: "350px", textAlign: "center", boxShadow: "0 20px 40px rgba(0,0,0,0.2)" }}>
-            <FaExclamationTriangle size={50} color={colores.eliminar} style={{ marginBottom: "20px" }} />
-            <h3 style={{ color: colores.primario, margin: "0 0 10px 0" }}>¿Eliminar producto?</h3>
-            <p style={{ color: colores.textoGris, fontSize: "14px", marginBottom: "30px" }}>
-              ¿Estás seguro de que quieres eliminar <b>{productoAEliminar?.name}</b>?
-            </p>
-            <div style={{ display: "flex", gap: "12px" }}>
-              <button onClick={() => setShowDeleteModal(false)} style={{ flex: 1, padding: "12px", borderRadius: "12px", border: "1px solid #e2e8f0", background: "white", fontWeight: "600", cursor: "pointer" }}>Cancelar</button>
-              <button onClick={ejecutarEliminacion} style={{ flex: 1, padding: "12px", borderRadius: "12px", border: "none", background: colores.eliminar, color: "white", fontWeight: "bold", cursor: "pointer" }}>Eliminar</button>
+        <div style={overlayStyle}>
+          <div style={{ ...modalStyle, width: '300px', padding: '30px' }}>
+            <FaExclamationTriangle color="#ef4444" size={40} style={{ marginBottom: '15px' }} />
+            <p style={{ margin: '0 0 20px 0', color: '#1e293b' }}>¿Deseas eliminar <b>{productoAEliminar?.nombre}</b>?</p>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button onClick={() => setShowDeleteModal(false)} style={btnCancel}>No</button>
+              <button onClick={ejecutarEliminacion} style={btnConfirmDelete}>Eliminar</button>
             </div>
           </div>
         </div>
@@ -240,19 +229,41 @@ export default function ProductosNegocio() {
   );
 }
 
-// Estilo de los botones de paginación
-const estiloBtnPaginacion = (activo, desactivado = false) => ({
-  width: "38px",
-  height: "38px",
-  borderRadius: "10px",
-  border: "1px solid #e2e8f0",
-  background: activo ? "#0e2a5a" : "white",
-  color: activo ? "white" : "#0e2a5a",
-  cursor: desactivado ? "not-allowed" : "pointer",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  fontWeight: "bold",
-  opacity: desactivado ? 0.5 : 1,
-  transition: "all 0.2s"
-});
+// --- ESTILOS DE TABLA E INTERFAZ ---
+const containerStyle = { padding: "40px", background: "#f8fafc", minHeight: "100vh", fontFamily: "'Inter', sans-serif" };
+const headerStyle = { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px" };
+const titleStyle = { margin: 0, color: "#0f172a", fontSize: "24px", fontWeight: "700" };
+const subtitleStyle = { margin: "4px 0 0 0", color: "#64748b", fontSize: "14px" };
+const btnPlusStyle = { background: "#0f172a", color: "white", padding: "10px 20px", borderRadius: "10px", border: "none", cursor: "pointer", fontWeight: "600", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px" };
+
+const tableCardStyle = { background: "white", borderRadius: "16px", border: "1px solid #e2e8f0", overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.02)" };
+const tableStyle = { width: "100%", borderCollapse: "collapse" };
+const thRowStyle = { background: "#fcfcfc" };
+const thStyle = { padding: "16px 24px", textAlign: "left", color: "#64748b", fontSize: "11px", fontWeight: "700", letterSpacing: "0.05em", textTransform: "uppercase", borderBottom: "1px solid #f1f5f9" };
+const trStyle = { borderBottom: "1px solid #f1f5f9" };
+const tdStyle = { padding: "16px 24px" };
+
+const brandText = { fontWeight: "600", color: "#0f172a", fontSize: "14px" };
+const productText = { fontSize: "12px", color: "#64748b", marginTop: "2px" };
+const priceText = { padding: "16px 24px", fontWeight: "700", color: "#0f172a", fontSize: "14px" };
+
+const actionBtn = { background: "none", border: "none", cursor: "pointer", color: "#64748b", fontSize: "16px", padding: "8px", borderRadius: "6px" };
+const deleteBtn = { ...actionBtn, color: "#cbd5e1", marginLeft: "4px" };
+
+// --- ESTILOS DE PAGINACIÓN (Sincronizado con Historial) ---
+const estiloPaginacion = { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px 24px", borderTop: "1px solid #f1f5f9", background: "#fcfcfc" };
+const estiloBtnPagina = (disabled) => ({ width: "36px", height: "36px", borderRadius: "10px", border: "1px solid #e2e8f0", background: disabled ? "#f8fafc" : "white", color: disabled ? "#cbd5e1" : "#1e293b", cursor: disabled ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "600", transition: "all 0.2s" });
+const estiloBtnPaginaActivo = { width: "36px", height: "36px", borderRadius: "10px", border: "none", background: "#0e2a5a", color: "white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "700" };
+
+// --- ESTILOS MODALES ---
+const overlayStyle = { position: "fixed", inset: 0, background: "rgba(15, 23, 42, 0.4)", backdropFilter: "blur(4px)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 100 };
+const modalStyle = { background: "white", borderRadius: "20px", width: "400px", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)", overflow: "hidden" };
+const modalHeader = { padding: "24px", borderBottom: "1px solid #f1f5f9", display: "flex", alignItems: "center", gap: "12px" };
+const formStyle = { padding: "24px" };
+const inputGroup = { marginBottom: "16px" };
+const labelStyle = { display: "block", fontSize: "12px", fontWeight: "600", color: "#475569", marginBottom: "6px" };
+const inputStyle = { width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid #e2e8f0", fontSize: "14px", outline: "none", boxSizing: "border-box" };
+const modalFooter = { display: "flex", gap: "12px", marginTop: "24px" };
+const btnSave = { flex: 2, padding: "12px", background: "#0f172a", color: "white", border: "none", borderRadius: "10px", cursor: "pointer", fontWeight: "600" };
+const btnCancel = { flex: 1, padding: "12px", background: "#f8fafc", color: "#64748b", border: "1px solid #e2e8f0", borderRadius: "10px", cursor: "pointer", fontWeight: "600" };
+const btnConfirmDelete = { ...btnSave, background: "#ef4444" };
