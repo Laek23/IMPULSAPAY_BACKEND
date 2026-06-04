@@ -27,7 +27,7 @@ const TarjetasCliente = ({ number, expiry, name, focused, brand }) => {
         cvc=""
         name={name || ""}
         focused={focused || ""}
-        issuer={brand} //ESTA ES LA CLAVE
+        issuer={brand} 
       />
     </div>
   );

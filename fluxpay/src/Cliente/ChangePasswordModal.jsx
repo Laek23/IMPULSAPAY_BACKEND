@@ -34,10 +34,16 @@ const ChangePasswordModal = ({ show, handleClose, currentPassword, onSave }) => 
     }
 
     // VALIDACIÓN REAL EN LARAVEL
-    Axios.put("http://127.0.0.1:8000/api/cliente/actualizar", {
-      current_password: current,
-      password: newPass
-    })
+const token = localStorage.getItem("token");
+
+Axios.put("http://127.0.0.1:8000/api/cliente/actualizar", {
+  current_password: current,
+  password: newPass
+}, {
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+})
     .then(() => {
       onSave(newPass);
       handleClose();

@@ -13,6 +13,7 @@ import {
   FaCog, 
 } from "react-icons/fa";
 import { CiCreditCard1 } from "react-icons/ci";
+import CerrarSesion from "../CerrarSesion";
 
 export default function DashboardCliente() {
   const navigate = useNavigate();

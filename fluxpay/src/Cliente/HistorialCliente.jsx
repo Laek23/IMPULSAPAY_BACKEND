@@ -11,17 +11,26 @@ import {FaHome,FaSignOutAlt,FaHistory,FaCog, }
 from "react-icons/fa";
 import { CiCreditCard1 } from "react-icons/ci";
 import { useNavigate } from "react-router-dom";
+import CerrarSesion from "../CerrarSesion";
 
 const HistorialCliente = () => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-  Axios.get("http://127.0.0.1:8000/api/historial")
+  const token = localStorage.getItem("token");
+
+  Axios.get("http://127.0.0.1:8000/api/historial", {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
     .then((res) => {
       setData(res.data);
     })
-    .catch((err) => console.error(err));
-    }, []);
+    .catch((err) => {
+      console.error(err.response?.data || err);
+    });
+}, []);
 
   const navigate = useNavigate();
 

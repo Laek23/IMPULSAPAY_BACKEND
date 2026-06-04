@@ -19,28 +19,38 @@ function ClienteTarjeta() {
   const [mostrar, setMostrar] = useState(false);
   const [tarjetas, setTarjetas] = useState([]);
 
-    useEffect(() => {
-    axios.get("http://127.0.0.1:8000/api/tarjetas")
-      .then(res => setTarjetas(res.data))
-      .catch(err => console.error(err));
-  }, []);
+useEffect(() => {
+  const token = localStorage.getItem("token");
+
+  axios.get("http://127.0.0.1:8000/api/tarjetas", {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+    .then(res => setTarjetas(res.data))
+    .catch(err => console.error(err));
+}, []);
 
   const handleMostrar = () => setMostrar(true);
   const handleCerrar = () => setMostrar(false);
 
 const handlesave = async (data) => {
   try {
+    const token = localStorage.getItem("token");
+
     const res = await axios.post("http://127.0.0.1:8000/api/tarjetas", {
       brand: data.brand,
       last4: data.last4,
       exp_month: data.exp_month,
       exp_year: data.exp_year,
       name: data.name
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     });
 
-    // guardar en frontend también
     setTarjetas((prev) => [res.data.data, ...prev]);
-
     setMostrar(false);
 
   } catch (error) {
@@ -48,12 +58,16 @@ const handlesave = async (data) => {
     alert("Error al guardar tarjeta");
   }
 };
-
 const borrarTarjeta = async (id) => {
   try {
-    await axios.delete(`http://127.0.0.1:8000/api/tarjetas/${id}`);
+    const token = localStorage.getItem("token");
 
-    // actualizar frontend
+    await axios.delete(`http://127.0.0.1:8000/api/tarjetas/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
     setTarjetas((prev) => prev.filter((t) => t.id !== id));
 
   } catch (error) {
@@ -61,7 +75,6 @@ const borrarTarjeta = async (id) => {
     alert("Error al eliminar tarjeta");
   }
 };
-
   return (
     <div className="page">
       
@@ -132,7 +145,7 @@ const borrarTarjeta = async (id) => {
                   <Card className="shadow-sm h-100">
                     <Card.Body>
 <TarjetasCliente
-  number={tarjeta.last4}   // 👈 SOLO LOS 4
+  number={tarjeta.last4}   //  SOLO LOS 4
   brand={tarjeta.brand} 
   expiry={`${tarjeta.exp_month}/${String(tarjeta.exp_year).slice(-2)}`}
   name={tarjeta.name}

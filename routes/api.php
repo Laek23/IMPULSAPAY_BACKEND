@@ -74,22 +74,22 @@ Route::middleware(['auth:sanctum', 'rol:1'])->group(function () {
 | TARJETAS
 |--------------------------------------------------------------------------
 */
-Route::get('/tarjetas', [TarjetaClienteController::class, 'listado']);
-Route::post('/tarjetas', [TarjetaClienteController::class, 'guardar']);
-Route::delete('/tarjetas/{id}', [TarjetaClienteController::class, 'eliminar']);
-
+Route::middleware('auth:sanctum')->get('/tarjetas', [TarjetaClienteController::class, 'listado']);
+Route::middleware('auth:sanctum')->post('/tarjetas', [TarjetaClienteController::class, 'guardar']);
+Route::middleware('auth:sanctum')->delete('/tarjetas/{id}', [TarjetaClienteController::class, 'eliminar']);
+// hasgdhjasdhakjsdhask
 /*
 |--------------------------------------------------------------------------
 | CLIENTES
 |--------------------------------------------------------------------------
 */
-Route::get('/historial', [ClienteController::class, 'historialCliente']);
-Route::get('/cliente/configuracion', [ClienteController::class, 'configuracion']);
-Route::put('/cliente/actualizar', [ClienteController::class, 'actualizar']);
+Route::middleware('auth:sanctum')->get('/historial', [ClienteController::class, 'historialCliente']);
+Route::middleware('auth:sanctum')->get('/cliente/configuracion', [ClienteController::class, 'configuracion']);
+Route::middleware('auth:sanctum')->put('/cliente/actualizar', [ClienteController::class, 'actualizar']);
 
 // CRUD clientes (temporal público)
-Route::get('/clientes', [ClienteController::class, 'index']);
-Route::post('/clientes', [ClienteController::class, 'store']);
+Route::middleware('auth:sanctum')->get('/clientes', [ClienteController::class, 'index']);
+Route::middleware('auth:sanctum')->post('/clientes', [ClienteController::class, 'store']);
 Route::put('/clientes/{id}', [ClienteController::class, 'update']);
 Route::delete('/clientes/{id}', [ClienteController::class, 'destroy']);
 

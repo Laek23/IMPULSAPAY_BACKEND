@@ -19,11 +19,16 @@ const ChangeEmailModal = ({ show, handleClose, currentPassword, onSave }) => {
       return;
     }
 
-    // VALIDACIÓN REAL EN LARAVEL
-    Axios.put("http://127.0.0.1:8000/api/cliente/actualizar", {
-      current_password: password,
-      correo: email
-    })
+const token = localStorage.getItem("token");
+
+Axios.put("http://127.0.0.1:8000/api/cliente/actualizar", {
+  current_password: password,
+  correo: email
+}, {
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+})
     .then(() => {
       onSave(email);
       handleClose();

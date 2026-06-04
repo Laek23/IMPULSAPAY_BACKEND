@@ -18,6 +18,7 @@ import CerrarSesion from "../CerrarSesion";
 import FotoPerfil from "./FotoPerfil.png";
 
 function ClienteConfiguracion() {
+  const token = localStorage.getItem("token");
 
   const navigate = useNavigate();
 
@@ -29,7 +30,11 @@ function ClienteConfiguracion() {
     foto: FotoPerfil
   });
   useEffect(() => {
-  Axios.get("http://127.0.0.1:8000/api/cliente/configuracion")
+  Axios.get("http://127.0.0.1:8000/api/cliente/configuracion", {
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+})
     .then((res) => {
       setUser((prev) => ({
         ...prev,
@@ -228,11 +233,15 @@ function ClienteConfiguracion() {
           title="Editar nombre"
           label="Nuevo nombre"
           value={user.nombre}
-          onSave={(value) => {
-            Axios.put("http://127.0.0.1:8000/api/cliente/actualizar", {
-              nombre: value
-            }).then(() => updateField("nombre", value));
-          }}
+  onSave={(value) => {
+    Axios.put("http://127.0.0.1:8000/api/cliente/actualizar", {
+      nombre: value
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }).then(() => updateField("nombre", value));
+  }}
         />
 
         <ClientDataForm
