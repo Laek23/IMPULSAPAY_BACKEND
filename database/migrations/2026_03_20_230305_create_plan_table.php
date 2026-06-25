@@ -9,15 +9,16 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         Schema::create('plan', function (Blueprint $table) {
             $table->id();
             $table->string('nombre', 100);
             $table->integer('dias');
-            $table->timestamps();
+            $table->decimal('precio', 10, 2);
         });
     }
+
     /**
      * Reverse the migrations.
      */

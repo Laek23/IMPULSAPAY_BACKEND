@@ -9,19 +9,26 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
-    {
-        Schema::create('planesnegocio', function (Blueprint $table) {
-            $table->id();
+public function up()
+{
+    Schema::create('planesnegocio', function (Blueprint $table) {
+        $table->id();
 
-            $table->foreignId('idplan')->constrained('plan')->onDelete('cascade');
-            $table->foreignId('idnegocio')->constrained('negocio')->onDelete('cascade');
+        $table->foreignId('idplan')
+            ->constrained('plan')
+            ->onDelete('cascade');
 
-            $table->integer('dias')->nullable();
+        $table->foreignId('idnegocio')
+            ->constrained('negocio')
+            ->onDelete('cascade');
 
-            $table->timestamps();
-        });
-    }
+        $table->timestamp('fecha_inicio')->nullable();
+        $table->timestamp('fecha_fin')->nullable();
+
+        $table->string('status', 45)->default('activo');
+
+    });
+}
     /**
      * Reverse the migrations.
      */
