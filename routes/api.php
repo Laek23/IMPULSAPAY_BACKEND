@@ -15,6 +15,11 @@ use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\MarcaController;
 use App\Http\Controllers\Api\TiendaClienteDashController;
 use App\Http\Controllers\Api\RolPermisoController;
+use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\GenerarTicketController;
+use App\Http\Controllers\Api\MovimientoController;
+use App\Http\Controllers\StripeController;
+
 /*
 |--------------------------------------------------------------------------
 | TEST
@@ -31,10 +36,9 @@ Route::get('/test', function () {
 */
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-use App\Http\Controllers\Api\DashboardController;
 
-// MUEVELA AQUÍ (Fuera de cualquier Route::group o middleware)
 Route::get('/dashboard', [DashboardController::class, 'index']);
+
 /*
 |--------------------------------------------------------------------------
 | RUTAS PROTEGIDAS (SANCTUM)
@@ -49,13 +53,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin', [AdminController::class, 'show']);
     Route::put('/admin', [AdminController::class, 'update']);
 
-
     Route::apiResource('negocios', NegocioController::class);
 
-   
-   Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('tickets', TicketController::class);
-});
 
     Route::post('/logout', [AuthController::class, 'logout']);
 });
@@ -69,12 +69,14 @@ Route::middleware(['auth:sanctum', 'rol:1'])->group(function () {
     Route::get('/admin-negocios', [NegocioController::class, 'index']);
 });
 
+/*
+|--------------------------------------------------------------------------
+| ROLES Y PERMISOS
+|--------------------------------------------------------------------------
+*/
 Route::get("/roles", [RolPermisoController::class, "roles"]);
-
 Route::get("/permisos", [RolPermisoController::class, "permisos"]);
-
 Route::get("/roles/{id}/permisos", [RolPermisoController::class, "permisosRol"]);
-
 Route::put("/roles/{id}/permisos", [RolPermisoController::class, "guardar"]);
 
 /*
@@ -82,22 +84,26 @@ Route::put("/roles/{id}/permisos", [RolPermisoController::class, "guardar"]);
 | TARJETAS
 |--------------------------------------------------------------------------
 */
-Route::middleware('auth:sanctum')->get('/tarjetas', [TarjetaClienteController::class, 'listado']);
-Route::middleware('auth:sanctum')->post('/tarjetas', [TarjetaClienteController::class, 'guardar']);
-Route::middleware('auth:sanctum')->delete('/tarjetas/{id}', [TarjetaClienteController::class, 'eliminar']);
-// hasgdhjasdhakjsdhask
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/tarjetas', [TarjetaClienteController::class, 'listado']);
+    Route::post('/tarjetas', [TarjetaClienteController::class, 'guardar']);
+    Route::delete('/tarjetas/{id}', [TarjetaClienteController::class, 'eliminar']);
+});
+
 /*
 |--------------------------------------------------------------------------
 | CLIENTES
 |--------------------------------------------------------------------------
 */
-Route::middleware('auth:sanctum')->get('/historial', [ClienteController::class, 'historialCliente']);
-Route::middleware('auth:sanctum')->get('/cliente/configuracion', [ClienteController::class, 'configuracion']);
-Route::middleware('auth:sanctum')->put('/cliente/actualizar', [ClienteController::class, 'actualizar']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/historial', [ClienteController::class, 'historialCliente']);
+    Route::get('/cliente/configuracion', [ClienteController::class, 'configuracion']);
+    Route::put('/cliente/actualizar', [ClienteController::class, 'actualizar']);
 
-// CRUD clientes (temporal público)
-Route::middleware('auth:sanctum')->get('/clientes', [ClienteController::class, 'index']);
-Route::middleware('auth:sanctum')->post('/clientes', [ClienteController::class, 'store']);
+    Route::get('/clientes', [ClienteController::class, 'index']);
+    Route::post('/clientes', [ClienteController::class, 'store']);
+});
+
 Route::put('/clientes/{id}', [ClienteController::class, 'update']);
 Route::delete('/clientes/{id}', [ClienteController::class, 'destroy']);
 
@@ -111,30 +117,35 @@ Route::apiResource('marcas', MarcaController::class);
 
 /*
 |--------------------------------------------------------------------------
-| DASHBOARD TIENDA
+| TIENDA DASHBOARD
 |--------------------------------------------------------------------------
 */
-
-//dash cliente tienda 
-// ¡ESTO ES VITAL! El middleware auth:sanctum debe envolver las rutas
-Route::middleware('auth:sanctum')->group(function () {
-    
-    Route::prefix('tienda/dashboard')->group(function () {
-        Route::get('productos', [TiendaClienteDashController::class, 'productos']);
-        Route::get('ingresos', [TiendaClienteDashController::class, 'ingresos']);
-        Route::get('resumen', [TiendaClienteDashController::class, 'resumen']);
-    });
-    
+Route::middleware('auth:sanctum')->prefix('tienda/dashboard')->group(function () {
+    Route::get('productos', [TiendaClienteDashController::class, 'productos']);
+    Route::get('ingresos', [TiendaClienteDashController::class, 'ingresos']);
+    Route::get('resumen', [TiendaClienteDashController::class, 'resumen']);
 });
 
-use App\Http\Controllers\Api\GenerarTicketController;
-
+/*
+|--------------------------------------------------------------------------
+| TICKETS
+|--------------------------------------------------------------------------
+*/
 Route::get('/tickets', [GenerarTicketController::class, 'index']);
 Route::post('/tickets', [GenerarTicketController::class, 'store']);
 
-
-//historial
-use App\Http\Controllers\Api\MovimientoController; // Nota el "\Api\"
-
+/*
+|--------------------------------------------------------------------------
+| MOVIMIENTOS
+|--------------------------------------------------------------------------
+*/
 Route::get('/movimientos', [MovimientoController::class, 'index']);
 
+/*
+|--------------------------------------------------------------------------
+| STRIPE
+|--------------------------------------------------------------------------
+*/
+Route::post('/create-payment', [StripeController::class, 'createPayment']);
+Route::post('/save-movimiento', [StripeController::class, 'saveMovimiento']);
+Route::get('/crear-cuenta-prueba', [StripeController::class, 'crearCuentaPrueba']);
