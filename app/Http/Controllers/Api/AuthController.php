@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use App\Models\Rol;
 
 class AuthController extends Controller
 {
@@ -52,26 +54,41 @@ class AuthController extends Controller
     $user = User::where('email', $request->email)->first();
 
     if (!$user || !Hash::check($request->password, $user->password)) {
-        return response()->json(['message' => 'Credenciales incorrectas'], 401);
+        return response()->json([
+            'message' => 'Credenciales incorrectas'
+        ], 401);
     }
 
-    //
+    // Elimina tokens anteriores
     $user->tokens()->delete();
 
+    // Crear nuevo token
     $token = $user->createToken('auth_token')->plainTextToken;
+
+    // Obtener información del rol
+    $rol = DB::table('rol')
+        ->where('id', $user->idrol)
+        ->first();
+
+    // Obtener permisos del usuario
+    $permisos = DB::table('rolxpermiso')
+        ->join('permiso', 'rolxpermiso.idpermiso', '=', 'permiso.id')
+        ->where('rolxpermiso.idrol', $user->idrol)
+        ->pluck('clave');
 
     return response()->json([
         'token' => $token,
+
         'user' => [
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
-            'idrol' => $user->idrol 
-        ],
-        'rol' => $user->idrol
+            'idrol' => $user->idrol,
+            'rol' => $rol->nombre,
+            'permisos' => $permisos
+        ]
     ]);
 }
-
     // LOGOUT
     public function logout(Request $request)
     {

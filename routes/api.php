@@ -14,7 +14,7 @@ use App\Http\Controllers\SesionController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\MarcaController;
 use App\Http\Controllers\Api\TiendaClienteDashController;
-
+use App\Http\Controllers\Api\RolPermisoController;
 /*
 |--------------------------------------------------------------------------
 | TEST
@@ -68,6 +68,14 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth:sanctum', 'rol:1'])->group(function () {
     Route::get('/admin-negocios', [NegocioController::class, 'index']);
 });
+
+Route::get("/roles", [RolPermisoController::class, "roles"]);
+
+Route::get("/permisos", [RolPermisoController::class, "permisos"]);
+
+Route::get("/roles/{id}/permisos", [RolPermisoController::class, "permisosRol"]);
+
+Route::put("/roles/{id}/permisos", [RolPermisoController::class, "guardar"]);
 
 /*
 |--------------------------------------------------------------------------
@@ -129,3 +137,4 @@ Route::post('/tickets', [GenerarTicketController::class, 'store']);
 use App\Http\Controllers\Api\MovimientoController; // Nota el "\Api\"
 
 Route::get('/movimientos', [MovimientoController::class, 'index']);
+
