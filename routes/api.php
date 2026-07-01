@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\GenerarTicketController;
 use App\Http\Controllers\Api\MovimientoController;
 use App\Http\Controllers\StripeController;
+use App\Http\Controllers\Api\InventarioController;
 
 /*
 |--------------------------------------------------------------------------
@@ -56,6 +57,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('negocios', NegocioController::class);
 
     Route::apiResource('tickets', TicketController::class);
+    Route::get('/inventario', [InventarioController::class, 'index']);
 
     Route::post('/logout', [AuthController::class, 'logout']);
 });
@@ -68,7 +70,9 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth:sanctum', 'rol:1'])->group(function () {
     Route::get('/admin-negocios', [NegocioController::class, 'index']);
 });
-
+//INVENTARIO
+Route::get('/inventario', [InventarioController::class, 'index']);
+Route::get('/inventario/sincronizar', [InventarioController::class, 'sincronizar']);
 /*
 |--------------------------------------------------------------------------
 | ROLES Y PERMISOS
