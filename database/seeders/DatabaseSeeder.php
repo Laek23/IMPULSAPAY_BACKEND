@@ -172,7 +172,7 @@ class DatabaseSeeder extends Seeder
                 'iduser'=>$faker->randomElement($clientes),
                 'monto_total'=>0,
                 'comision'=>0,
-                'metodo_pago'=>$faker->randomElement(['tarjeta','efectivo','transferencia']),
+                'metodo_pago'=>$faker->randomElement(['tarjeta','efectivo','transferencia','QR']),
                 'referencia_pago'=>strtoupper($faker->bothify('REF###??')),
                 'fecha_movimiento'=>$faker->dateTimeThisYear(),
                 'status'=>1,

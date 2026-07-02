@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Producto; // <--- OBLIGATORIO
-
+use App\Models\Inventario;
 class ProductoController extends Controller
 {
     public function index()
@@ -30,9 +30,19 @@ class ProductoController extends Controller
 
             // Forzamos el status a 1 ya que lo vimos en tu DB
             $validated['status'] = 1;
+$producto = Producto::create($validated);
 
-            $producto = Producto::create($validated);
-            return response()->json($producto, 201);
+// Crear automáticamente el inventario
+Inventario::create([
+    'idproducto'      => $producto->id,
+    'idnegocio'       => $producto->idnegocio,
+    'stock'           => 0,
+    'stock_minimo'    => 10,
+    'en_produccion'   => 0,
+    'estado'          => 'Agotado'
+]);
+
+return response()->json($producto, 201);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }

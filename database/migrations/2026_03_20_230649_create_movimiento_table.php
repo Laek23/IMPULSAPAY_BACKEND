@@ -14,8 +14,12 @@ return new class extends Migration
         Schema::create('movimiento', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('idnegocio')->constrained('negocio')->onDelete('cascade');
+            $table->foreignId('idnegocio')
+                  ->constrained('negocio')
+                  ->onDelete('cascade');
+
             $table->unsignedBigInteger('iduser');
+
             $table->decimal('monto_total', 10, 2)->nullable();
             $table->decimal('comision', 10, 2)->nullable();
 
@@ -26,6 +30,11 @@ return new class extends Migration
             $table->dateTime('fecha_devolucion')->nullable();
 
             $table->tinyInteger('status')->nullable();
+
+            // Campos de Stripe
+            $table->string('stripe_payment_intent', 255)->nullable();
+            $table->string('stripe_charge_id', 255)->nullable();
+            $table->string('stripe_status', 50)->nullable();
 
             $table->timestamps();
         });

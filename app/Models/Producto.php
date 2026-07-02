@@ -26,4 +26,13 @@ class Producto extends Model
     {
         return $this->belongsTo(Marca::class, 'idmarca');
     }
+    public function inventario()
+{
+    return $this->hasOne(Inventario::class, 'idproducto');
+}
+
+public function negocio()
+{
+    return $this->belongsTo(Negocio::class, 'idnegocio');
+}
 }

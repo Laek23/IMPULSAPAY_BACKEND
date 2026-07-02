@@ -19,5 +19,14 @@ class Negocio extends Model
 {
     return $this->hasMany(Ticket::class, 'negocio_id');
 }
+public function productos()
+{
+    return $this->hasMany(Producto::class, 'idnegocio');
+}
+
+public function inventarios()
+{
+    return $this->hasMany(Inventario::class, 'idnegocio');
+}
 }
 
